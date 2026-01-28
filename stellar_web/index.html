@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar Web Simulation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Info Overlay -->
+    <div id="info">
+        <h1>Stellar Web Simulation</h1>
+        <p>Mouse: Rotate | Scroll: Zoom | Drag: Pan</p>
+        <p>Press SPACE to pause | R to reset camera</p>
+        <div id="stats" style="margin-top: 10px; font-size: 11px; color: rgba(255, 255, 255, 0.6);">
+            <p>Connections: <span id="connections">0</span></p>
+            <p>Avg per node: <span id="avg-connections">0</span></p>
+        </div>
+    </div>
+
+    <!-- Three.js Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Scripts -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.19"></script>
+    <script type="module" src="utils.js"></script>
+    <script type="module" src="particles.js"></script>
+    <script type="module" src="controls.js"></script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
