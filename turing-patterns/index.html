@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turing Pattern Simulation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <div id="canvas-container">
+            <canvas id="sim-canvas" width="512" height="512"></canvas>
+            <div id="brush-cursor"></div>
+            <div id="comparison-divider" class="hidden">
+                <div class="divider-handle"></div>
+            </div>
+        </div>
+
+        <div id="controls">
+            <h2>Turing Patterns</h2>
+
+            <div class="control-section">
+                <h3>Model</h3>
+                <div class="model-tabs">
+                    <button class="model-tab active" data-model="grayScott">Gray-Scott</button>
+                    <button class="model-tab" data-model="fitzhughNagumo">FitzHugh-Nagumo</button>
+                    <button class="model-tab" data-model="giererMeinhardt">Gierer-Meinhardt</button>
+                    <button class="model-tab" data-model="brusselator">Brusselator</button>
+                    <button class="model-tab" data-model="schnakenberg">Schnakenberg</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Pattern Presets</h3>
+                <div class="preset-grid" id="preset-grid"></div>
+            </div>
+
+            <div class="control-section" id="param-section">
+                <h3>Parameters</h3>
+                <div id="param-sliders"></div>
+            </div>
+
+            <div class="control-section">
+                <h3>Compare</h3>
+                <div class="button-group">
+                    <button id="toggleComparison">Enable Comparison</button>
+                </div>
+                <div id="comparison-controls" class="hidden">
+                    <div class="comparison-tabs">
+                        <button class="comp-tab active" data-sim="A">Sim A</button>
+                        <button class="comp-tab" data-sim="B">Sim B</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Brush</h3>
+                <div class="control-group">
+                    <label>Size: <span id="brushSizeValue">20</span></label>
+                    <input type="range" id="brushSize" min="1" max="50" value="20">
+                </div>
+                <div class="control-group">
+                    <label>Intensity: <span id="brushIntensityValue">0.50</span></label>
+                    <input type="range" id="brushIntensity" min="1" max="100" value="50">
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Visualization</h3>
+                <div class="control-group">
+                    <label>Color Map</label>
+                    <select id="colormap-select">
+                        <option value="heat">Heat Map</option>
+                        <option value="ocean">Ocean</option>
+                        <option value="grayscale">Grayscale</option>
+                        <option value="neon">Neon</option>
+                        <option value="viridis">Viridis</option>
+                        <option value="magma">Magma</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Display Channel</label>
+                    <select id="channel-select">
+                        <option value="0">Chemical A</option>
+                        <option value="1">Chemical B</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Simulation</h3>
+                <div class="control-group">
+                    <label>Speed: <span id="speedValue">10</span> steps/frame</label>
+                    <input type="range" id="speed" min="1" max="40" value="10">
+                </div>
+                <div class="button-group">
+                    <button id="playPause">Pause</button>
+                    <button id="reset">Reset</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Journey Mode</h3>
+                <div class="control-group">
+                    <label>Predefined Path</label>
+                    <select id="journey-select">
+                        <option value="">-- Select a Journey --</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Speed: <span id="journeySpeedValue">50</span></label>
+                    <input type="range" id="journeySpeed" min="1" max="100" value="50">
+                </div>
+                <div class="button-group">
+                    <button id="journeyPlay" disabled>Play Journey</button>
+                    <button id="journeyDrawPath">Draw Path</button>
+                </div>
+                <div class="control-group">
+                    <label><input type="checkbox" id="journeyLoop"> Loop</label>
+                </div>
+                <canvas id="journey-map" width="200" height="200" class="hidden"></canvas>
+                <div id="journey-map-labels" class="hidden">
+                    <span class="axis-label x-label">Feed (f)</span>
+                    <span class="axis-label y-label">Kill (k)</span>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <button id="toggleEducation" class="btn-info">About Turing Patterns</button>
+            </div>
+
+            <p class="hint">Click &amp; drag on canvas to paint chemicals</p>
+        </div>
+    </div>
+
+    <div id="education-overlay" class="hidden">
+        <div class="education-content">
+            <button id="closeEducation" class="close-btn">&times;</button>
+            <div id="education-body"></div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
