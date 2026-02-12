@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fractal Explorer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="fractal-canvas"></canvas>
+
+    <!-- Julia preview mini-canvas (hidden by default) -->
+    <canvas id="julia-preview" width="200" height="200"></canvas>
+
+    <!-- Collapsible sidebar -->
+    <aside id="sidebar">
+        <h2>Fractal Explorer</h2>
+
+        <!-- Fractal type tabs -->
+        <div class="control-section">
+            <h3>Fractal Type</h3>
+            <div class="fractal-tabs">
+                <button class="fractal-tab active" data-fractal="julia">Julia</button>
+                <button class="fractal-tab" data-fractal="mandelbrot">Mandelbrot</button>
+                <button class="fractal-tab" data-fractal="burningShip">Burning Ship</button>
+                <button class="fractal-tab" data-fractal="newton">Newton</button>
+                <button class="fractal-tab" data-fractal="phoenix">Phoenix</button>
+            </div>
+        </div>
+
+        <!-- Presets -->
+        <div class="control-section">
+            <h3>Presets</h3>
+            <div id="preset-grid" class="preset-grid"></div>
+        </div>
+
+        <!-- Dynamic parameter sliders -->
+        <div class="control-section">
+            <h3>Parameters</h3>
+            <div id="param-sliders"></div>
+        </div>
+
+        <!-- Iteration count -->
+        <div class="control-section">
+            <h3>Rendering</h3>
+            <div class="control-group">
+                <label>Max Iterations: <span id="maxIterValue">200</span></label>
+                <input type="range" id="maxIter" min="50" max="2000" value="200" step="10">
+            </div>
+        </div>
+
+        <!-- Color palette -->
+        <div class="control-section">
+            <h3>Color Palette</h3>
+            <select id="palette-select">
+                <option value="classic">Classic Blue-Gold</option>
+                <option value="fire">Fire</option>
+                <option value="ocean">Ocean</option>
+                <option value="grayscale">Grayscale</option>
+                <option value="rainbow">Rainbow</option>
+                <option value="neon">Neon</option>
+                <option value="ice">Ice</option>
+                <option value="magma">Magma</option>
+            </select>
+        </div>
+
+        <!-- Animation -->
+        <div class="control-section" id="animation-section">
+            <h3>Animation</h3>
+            <div class="button-group">
+                <button id="animToggle">Animate</button>
+            </div>
+            <div class="control-group">
+                <label>Speed: <span id="animSpeedValue">1.0</span></label>
+                <input type="range" id="animSpeed" min="0.01" max="2.0" value="1.0" step="0.1">
+            </div>
+        </div>
+
+        <!-- Linked mode (visible only on Mandelbrot) -->
+        <div class="control-section" id="linked-section" style="display: none;">
+            <h3>Mandelbrot &rarr; Julia</h3>
+            <div class="control-group">
+                <label><input type="checkbox" id="linkedMode"> Show Julia preview on hover</label>
+            </div>
+            <p class="hint">Hover to preview, click to switch</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="control-section actions-section">
+            <div class="button-group">
+                <button id="resetView">Reset View</button>
+                <button id="fullscreenBtn">Fullscreen</button>
+            </div>
+        </div>
+
+        <p class="hint">Scroll to zoom &middot; Drag to pan</p>
+    </aside>
+
+    <!-- Sidebar toggle (AFTER sidebar in DOM for CSS ~ selector) -->
+    <button id="sidebar-toggle" aria-label="Toggle controls">&#9776;</button>
+
+    <!-- Error display for debugging -->
+    <div id="error-display"></div>
+
+    <script type="module" src="js/main.js"></script>
+    <script>
+        // Catch module loading errors
+        window.addEventListener('error', function(e) {
+            var el = document.getElementById('error-display');
+            if (el) {
+                el.style.display = 'block';
+                el.textContent = 'Error: ' + (e.message || e) + ' at ' + (e.filename || '') + ':' + (e.lineno || '');
+            }
+        });
+    </script>
+</body>
+</html>
