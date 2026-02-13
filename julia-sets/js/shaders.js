@@ -22,13 +22,39 @@ uniform float u_aspectRatio;
 uniform float u_time;
 `;
 
-// Shared coloring function using 1D texture lookup
+// Shared coloring function using 1D texture lookup with 4 coloring modes
+// Mode 0: Smooth Iteration (default)
+// Mode 1: Orbit Trap (min distance to origin)
+// Mode 2: Distance Estimation (boundary glow)
+// Mode 3: Interior Coloring (average orbit magnitude)
 const COLORING_FUNC = `
 uniform sampler2D u_colormap;
+uniform float u_colorOffset;
+uniform int u_colorMode;
 
-vec3 getColor(float iter, float maxIter) {
-    if (iter >= maxIter) return vec3(0.0);
-    float t = iter / maxIter;
+vec3 getColor(float iter, float maxIter, float trapDist, float distEst, float avgMag) {
+    if (iter >= maxIter) {
+        // Interior: mode 3 colors it, otherwise black
+        if (u_colorMode == 3) {
+            float t = fract(avgMag * 0.5 + u_colorOffset);
+            return texture(u_colormap, vec2(t, 0.5)).rgb * 0.6;
+        }
+        return vec3(0.0);
+    }
+
+    float t;
+    if (u_colorMode == 1) {
+        // Orbit trap
+        t = clamp(1.0 - trapDist, 0.0, 1.0);
+    } else if (u_colorMode == 2) {
+        // Distance estimation
+        t = clamp(sqrt(distEst) * 200.0, 0.0, 1.0);
+    } else {
+        // Smooth iteration (modes 0 and 3 for escaped points)
+        t = iter / maxIter;
+    }
+
+    t = fract(t + u_colorOffset);
     return texture(u_colormap, vec2(t, 0.5)).rgb;
 }
 `;
@@ -58,9 +84,19 @@ ${COORD_FUNC}
 void main() {
     vec2 z = pixelToComplex(v_uv);
     vec2 c = u_juliaC;
+
+    float minTrapDist = 1e10;
+    vec2 dz = vec2(1.0, 0.0);
+    float sumMag = 0.0;
+
     float i;
     for (i = 0.0; i < float(u_maxIter); i += 1.0) {
         if (dot(z, z) > 4.0) break;
+
+        minTrapDist = min(minTrapDist, length(z));
+        dz = 2.0 * vec2(z.x * dz.x - z.y * dz.y, z.x * dz.y + z.y * dz.x);
+        sumMag += length(z);
+
         z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
     }
     // Smooth iteration count
@@ -69,7 +105,15 @@ void main() {
         float nu = log(log_zn / log(2.0)) / log(2.0);
         i = i + 1.0 - nu;
     }
-    vec3 col = getColor(i, float(u_maxIter));
+
+    float distEst = 0.0;
+    if (dot(dz, dz) > 0.0) {
+        float modZ = length(z);
+        distEst = modZ * log(modZ) / length(dz);
+    }
+    float avgMag = sumMag / max(i, 1.0);
+
+    vec3 col = getColor(i, float(u_maxIter), minTrapDist, distEst, avgMag);
     fragColor = vec4(col, 1.0);
 }
 `;
@@ -89,9 +133,19 @@ ${COORD_FUNC}
 void main() {
     vec2 c = pixelToComplex(v_uv);
     vec2 z = vec2(0.0);
+
+    float minTrapDist = 1e10;
+    vec2 dz = vec2(0.0);
+    float sumMag = 0.0;
+
     float i;
     for (i = 0.0; i < float(u_maxIter); i += 1.0) {
         if (dot(z, z) > 4.0) break;
+
+        minTrapDist = min(minTrapDist, length(z));
+        dz = 2.0 * vec2(z.x * dz.x - z.y * dz.y, z.x * dz.y + z.y * dz.x) + vec2(1.0, 0.0);
+        sumMag += length(z);
+
         z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
     }
     if (i < float(u_maxIter)) {
@@ -99,7 +153,15 @@ void main() {
         float nu = log(log_zn / log(2.0)) / log(2.0);
         i = i + 1.0 - nu;
     }
-    vec3 col = getColor(i, float(u_maxIter));
+
+    float distEst = 0.0;
+    if (dot(dz, dz) > 0.0) {
+        float modZ = length(z);
+        distEst = modZ * log(modZ) / length(dz);
+    }
+    float avgMag = sumMag / max(i, 1.0);
+
+    vec3 col = getColor(i, float(u_maxIter), minTrapDist, distEst, avgMag);
     fragColor = vec4(col, 1.0);
 }
 `;
@@ -121,9 +183,17 @@ void main() {
     // Flip Y for Burning Ship (conventional orientation)
     c.y = -c.y;
     vec2 z = vec2(0.0);
+
+    float minTrapDist = 1e10;
+    float sumMag = 0.0;
+
     float i;
     for (i = 0.0; i < float(u_maxIter); i += 1.0) {
         if (dot(z, z) > 4.0) break;
+
+        minTrapDist = min(minTrapDist, length(z));
+        sumMag += length(z);
+
         z = vec2(abs(z.x), abs(z.y));
         z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
     }
@@ -132,7 +202,10 @@ void main() {
         float nu = log(log_zn / log(2.0)) / log(2.0);
         i = i + 1.0 - nu;
     }
-    vec3 col = getColor(i, float(u_maxIter));
+
+    float avgMag = sumMag / max(i, 1.0);
+
+    vec3 col = getColor(i, float(u_maxIter), minTrapDist, 0.0, avgMag);
     fragColor = vec4(col, 1.0);
 }
 `;
@@ -157,9 +230,17 @@ void main() {
     float cRe = u_juliaC.x;
     float pRe = u_phoenix.x;
     float pIm = u_phoenix.y;
+
+    float minTrapDist = 1e10;
+    float sumMag = 0.0;
+
     float i;
     for (i = 0.0; i < float(u_maxIter); i += 1.0) {
         if (dot(z, z) > 4.0) break;
+
+        minTrapDist = min(minTrapDist, length(z));
+        sumMag += length(z);
+
         vec2 zNew;
         // z_new = z^2 + c_re + p * z_prev
         zNew.x = z.x * z.x - z.y * z.y + cRe + pRe * zPrev.x - pIm * zPrev.y;
@@ -172,12 +253,16 @@ void main() {
         float nu = log(log_zn / log(2.0)) / log(2.0);
         i = i + 1.0 - nu;
     }
-    vec3 col = getColor(i, float(u_maxIter));
+
+    float avgMag = sumMag / max(i, 1.0);
+
+    vec3 col = getColor(i, float(u_maxIter), minTrapDist, 0.0, avgMag);
     fragColor = vec4(col, 1.0);
 }
 `;
 
 // ---------- Newton Fractal ----------
+// Newton keeps its own root-based coloring; only color offset applies
 export const NEWTON_FRAG = `#version 300 es
 precision highp float;
 
@@ -189,6 +274,8 @@ in vec2 v_uv;
 out vec4 fragColor;
 
 uniform sampler2D u_colormap;
+uniform float u_colorOffset;
+uniform int u_colorMode;
 
 ${COORD_FUNC}
 
@@ -241,7 +328,7 @@ void main() {
     // Map root + convergence speed to color
     float shade = 1.0 - i / float(u_maxIter);
     shade = pow(shade, 0.5);
-    float t = (rootIndex + 0.5) / float(deg);
+    float t = fract((rootIndex + 0.5) / float(deg) + u_colorOffset);
     vec3 rootColor = texture(u_colormap, vec2(t, 0.5)).rgb;
     vec3 col = rootColor * shade;
 

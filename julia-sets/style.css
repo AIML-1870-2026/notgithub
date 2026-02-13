@@ -323,6 +323,48 @@ input[type="checkbox"] {
     background: #555;
 }
 
+/* Zoom depth indicator */
+#zoom-indicator {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(20, 20, 40, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    font-size: 0.8rem;
+    color: #4FC3F7;
+    z-index: 40;
+    pointer-events: none;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#zoom-indicator.warning {
+    color: #ff9800;
+    border-color: rgba(255, 152, 0, 0.3);
+}
+
+/* Waypoint label overlay */
+#waypoint-label {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20, 20, 40, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    color: #4FC3F7;
+    z-index: 40;
+    pointer-events: none;
+    border: 1px solid rgba(79, 195, 247, 0.3);
+    letter-spacing: 0.5px;
+}
+
 /* Error display */
 #error-display {
     display: none;
@@ -341,6 +383,60 @@ input[type="checkbox"] {
     overflow-y: auto;
     white-space: pre-wrap;
     word-break: break-all;
+}
+
+/* Keyboard shortcut overlay */
+#shortcut-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(20, 20, 40, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 24px 32px;
+    z-index: 80;
+    min-width: 300px;
+}
+
+#shortcut-overlay h3 {
+    text-align: center;
+    color: #4FC3F7;
+    margin-bottom: 16px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#shortcut-overlay table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#shortcut-overlay td {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+}
+
+#shortcut-overlay td:first-child {
+    text-align: right;
+    padding-right: 16px;
+    white-space: nowrap;
+}
+
+kbd {
+    display: inline-block;
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    font-size: 0.8rem;
+    color: #4FC3F7;
+    min-width: 20px;
+    text-align: center;
 }
 
 /* Hidden utility */
@@ -382,5 +478,45 @@ input[type="checkbox"] {
 
     #error-display {
         right: 20px;
+    }
+
+    /* Larger touch targets for mobile */
+    button {
+        min-height: 44px;
+        font-size: 0.85rem;
+    }
+
+    .fractal-tab {
+        padding: 10px 14px;
+        font-size: 0.8rem;
+    }
+
+    .preset-btn {
+        padding: 10px 14px;
+        font-size: 0.8rem;
+    }
+
+    select {
+        padding: 12px 10px;
+        font-size: 0.9rem;
+    }
+
+    input[type="range"] {
+        height: 10px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+    }
+
+    #sidebar-toggle {
+        padding: 12px 16px;
+        font-size: 1.4rem;
     }
 }

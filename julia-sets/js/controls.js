@@ -16,7 +16,13 @@ export function initControls(app) {
         palette: 'classic',
         time: 0,
         linkedMode: false,
+        colorCycling: false,
+        colorCycleSpeed: 1.0,
+        colorOffset: 0,
+        colorMode: 0,
     };
+
+    const fractalChangeCallbacks = [];
 
     // --- Fractal type tabs ---
     const fractalTabs = document.querySelectorAll('.fractal-tab');
@@ -37,6 +43,7 @@ export function initControls(app) {
             renderPresets();
             updateLinkedSection();
             updateAnimSection();
+            fractalChangeCallbacks.forEach(cb => cb(type));
             markDirty();
         });
     });
@@ -142,6 +149,30 @@ export function initControls(app) {
         markDirty();
     });
 
+    // --- Color cycling ---
+    const colorCycleToggle = document.getElementById('colorCycleToggle');
+    const colorCycleSpeedSlider = document.getElementById('colorCycleSpeed');
+    const colorCycleSpeedValue = document.getElementById('colorCycleSpeedValue');
+    const colorCycleSpeedGroup = document.getElementById('colorCycleSpeedGroup');
+
+    colorCycleToggle.addEventListener('change', () => {
+        state.colorCycling = colorCycleToggle.checked;
+        colorCycleSpeedGroup.style.display = state.colorCycling ? '' : 'none';
+        markDirty();
+    });
+
+    colorCycleSpeedSlider.addEventListener('input', () => {
+        state.colorCycleSpeed = parseFloat(colorCycleSpeedSlider.value);
+        colorCycleSpeedValue.textContent = state.colorCycleSpeed.toFixed(1);
+    });
+
+    // --- Coloring mode ---
+    const colorModeSelect = document.getElementById('color-mode');
+    colorModeSelect.addEventListener('change', () => {
+        state.colorMode = parseInt(colorModeSelect.value);
+        markDirty();
+    });
+
     // --- Animation ---
     const animToggle = document.getElementById('animToggle');
     const animSpeedSlider = document.getElementById('animSpeed');
@@ -230,6 +261,7 @@ export function initControls(app) {
 
     return {
         state,
-        updateSliderDisplays
+        updateSliderDisplays,
+        onFractalChange(cb) { fractalChangeCallbacks.push(cb); }
     };
 }

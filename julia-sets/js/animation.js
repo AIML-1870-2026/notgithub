@@ -20,7 +20,14 @@ export class AnimationController {
     }
 
     update(state) {
-        if (!this.active) return false;
+        // Color cycling runs independently of parameter animation
+        let changed = false;
+        if (state.colorCycling) {
+            state.colorOffset = (state.colorOffset || 0) + 0.001 * (state.colorCycleSpeed || 1.0);
+            changed = true;
+        }
+
+        if (!this.active) return changed;
 
         const elapsed = (performance.now() / 1000 - this._startTime) * this.speed;
 

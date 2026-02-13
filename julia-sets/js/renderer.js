@@ -78,7 +78,7 @@ export class Renderer {
         const program = this.programs[name];
         const uniforms = [
             'u_resolution', 'u_center', 'u_zoom', 'u_maxIter',
-            'u_aspectRatio', 'u_time', 'u_colormap',
+            'u_aspectRatio', 'u_time', 'u_colormap', 'u_colorOffset', 'u_colorMode',
             'u_juliaC', 'u_phoenix', 'u_degree', 'u_relaxation'
         ];
         this.uniformLocations[name] = {};
@@ -132,6 +132,8 @@ export class Renderer {
         gl.uniform1i(locs.u_maxIter, state.maxIter);
         gl.uniform1f(locs.u_aspectRatio, this.canvas.width / this.canvas.height);
         gl.uniform1f(locs.u_time, state.time || 0);
+        gl.uniform1f(locs.u_colorOffset, state.colorOffset || 0);
+        gl.uniform1i(locs.u_colorMode, state.colorMode || 0);
 
         // Colormap texture
         gl.activeTexture(gl.TEXTURE0);

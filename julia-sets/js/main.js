@@ -6,6 +6,9 @@ import { FRACTAL_DEFS, getDefaultParams } from './fractals.js';
 import { InteractionManager } from './interaction.js';
 import { AnimationController } from './animation.js';
 import { initControls } from './controls.js';
+import { KeyboardManager } from './keyboard.js';
+import { Journey } from './journey.js';
+import { InfiniteZoom } from './infiniteZoom.js';
 
 // --- Error display helper ---
 function showError(msg) {
@@ -47,13 +50,35 @@ interaction.setView(defaultView.centerX, defaultView.centerY, defaultView.zoom);
 const animation = new AnimationController();
 
 // --- Controls ---
-const { state, updateSliderDisplays } = initControls({
+const { state, updateSliderDisplays, onFractalChange } = initControls({
     renderer,
     interaction,
     animation,
     colormapTex,
     markDirty
 });
+
+// --- Keyboard shortcuts ---
+new KeyboardManager({ state, interaction, animation, markDirty, updateSliderDisplays });
+
+// --- Journey mode ---
+const journey = new Journey({ state, interaction, markDirty, updateSliderDisplays });
+onFractalChange((type) => journey.populateForFractal(type));
+
+// --- Infinite zoom ---
+const infiniteZoom = new InfiniteZoom(interaction, markDirty);
+document.getElementById('infiniteZoomToggle').addEventListener('change', (e) => {
+    infiniteZoom.enabled = e.target.checked;
+});
+
+// --- Three-finger swipe to switch fractals ---
+const fractalOrder = ['julia', 'mandelbrot', 'burningShip', 'newton', 'phoenix'];
+interaction.onSwitch = (direction) => {
+    const currentIndex = fractalOrder.indexOf(state.fractal);
+    if (currentIndex === -1) return;
+    const nextIndex = (currentIndex + direction + fractalOrder.length) % fractalOrder.length;
+    document.querySelector(`[data-fractal="${fractalOrder[nextIndex]}"]`).click();
+};
 
 // --- Julia preview for linked mode ---
 const previewCanvas = document.getElementById('julia-preview');
@@ -141,13 +166,30 @@ canvas.addEventListener('click', () => {
 });
 
 // --- Animation loop ---
+let lastTime = performance.now();
 function animate() {
     requestAnimationFrame(animate);
+
+    const now = performance.now();
+    const dt = (now - lastTime) / 1000;
+    lastTime = now;
 
     const paramChanged = animation.update(state);
     if (paramChanged) {
         dirty = true;
         updateSliderDisplays();
+    }
+
+    if (journey.update(dt)) {
+        dirty = true;
+    }
+
+    if (infiniteZoom.update(state, dt)) {
+        dirty = true;
+    }
+
+    if (interaction.updateInertia(dt)) {
+        dirty = true;
     }
 
     if (!dirty) return;
@@ -156,6 +198,23 @@ function animate() {
     try {
         const viewport = interaction.getViewport();
         renderer.render(state, colormapTex, viewport);
+
+        // Update zoom depth indicator
+        const defaultZoom = FRACTAL_DEFS[state.fractal].defaultView.zoom;
+        const depth = defaultZoom / viewport.zoom;
+        const depthEl = document.getElementById('zoom-depth');
+        const indicatorEl = document.getElementById('zoom-indicator');
+        if (infiniteZoom.isTransitioning()) {
+            depthEl.textContent = '\u21BB Resetting...';
+            indicatorEl.classList.remove('warning');
+        } else if (depth > 1.5) {
+            const exp = Math.log10(depth);
+            depthEl.textContent = `10^${exp.toFixed(1)}x`;
+            indicatorEl.classList.toggle('warning', viewport.zoom < 5e-7);
+        } else {
+            depthEl.textContent = '1x';
+            indicatorEl.classList.remove('warning');
+        }
     } catch (e) {
         showError('Render error: ' + e.message);
     }
