@@ -21,6 +21,102 @@ body {
     background: #1a1a2e;
 }
 
+/* Stats HUD */
+#stats {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(30, 30, 50, 0.85);
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    min-width: 140px;
+    z-index: 10;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+}
+
+.stat-label {
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.7rem;
+}
+
+.stat-value {
+    color: #4FC3F7;
+    font-weight: 600;
+    min-width: 36px;
+    text-align: right;
+}
+
+/* Live Chart */
+#chartPanel {
+    position: fixed;
+    top: 160px;
+    left: 20px;
+    width: 240px;
+    z-index: 10;
+}
+
+#chartCanvas {
+    display: block;
+    width: 240px;
+    height: 130px;
+    border-radius: 10px;
+}
+
+.chart-legend {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(30, 30, 50, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #666;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.65rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: auto;
+    flex: none;
+}
+
+.legend-item:hover {
+    background: rgba(40, 40, 60, 0.9);
+}
+
+.legend-item.active {
+    color: #ccc;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.legend-swatch {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.legend-item:not(.active) .legend-swatch {
+    opacity: 0.3;
+}
+
+/* Controls panel */
 #controls {
     position: fixed;
     top: 20px;
@@ -33,13 +129,53 @@ body {
     overflow-y: auto;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 10;
 }
 
-#controls h2 {
+.controls-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.controls-header h2 {
     font-size: 1.4rem;
-    margin-bottom: 20px;
     color: #4FC3F7;
-    text-align: center;
+    margin: 0;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+    min-width: auto;
+    flex: none;
+}
+
+.icon-btn:hover {
+    color: #4FC3F7;
+    background: rgba(79, 195, 247, 0.1);
+}
+
+.icon-btn.collapsed {
+    transform: rotate(-90deg);
+}
+
+#controlsBody {
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
+}
+
+#controlsBody.collapsed {
+    max-height: 0 !important;
+    opacity: 0;
+    pointer-events: none;
 }
 
 #controls h3 {
@@ -50,8 +186,47 @@ body {
     letter-spacing: 1px;
 }
 
+#controls h3:first-child {
+    margin-top: 4px;
+}
+
+/* Presets */
+.preset-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.preset-btn {
+    flex: none;
+    min-width: auto;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    background: #2a2a40;
+    color: #aaa;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.preset-btn:hover {
+    background: #333350;
+    color: #fff;
+    border-color: rgba(79, 195, 247, 0.3);
+}
+
+.preset-btn.active {
+    background: rgba(79, 195, 247, 0.15);
+    color: #4FC3F7;
+    border-color: #4FC3F7;
+}
+
+/* Control groups */
 .control-group {
     margin-bottom: 15px;
+    position: relative;
 }
 
 .control-group label {
@@ -173,6 +348,57 @@ button:active {
     line-height: 1.5;
 }
 
+/* Tooltips */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%);
+    background: rgba(20, 20, 35, 0.95);
+    color: #ddd;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    white-space: normal;
+    width: max-content;
+    max-width: 220px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    transform: translateX(-50%) translateY(4px);
+    z-index: 100;
+    border: 1px solid rgba(79, 195, 247, 0.2);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+[data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Preset button tooltips appear below instead */
+.preset-btn[data-tooltip]::after {
+    bottom: auto;
+    top: calc(100% + 8px);
+    transform: translateX(-50%) translateY(-4px);
+}
+
+.preset-btn[data-tooltip]:hover::after {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Button tooltips appear above */
+.button-group [data-tooltip]::after {
+    bottom: calc(100% + 8px);
+    top: auto;
+}
+
 /* Scrollbar styling */
 #controls::-webkit-scrollbar {
     width: 6px;
@@ -200,5 +426,23 @@ button:active {
         bottom: 20px;
         right: 20px;
         max-height: 50vh;
+    }
+
+    #stats {
+        top: 10px;
+        left: 10px;
+        font-size: 0.7rem;
+        padding: 8px 12px;
+    }
+
+    #chartPanel {
+        top: 140px;
+        left: 10px;
+        width: 200px;
+    }
+
+    #chartCanvas {
+        width: 200px;
+        height: 100px;
     }
 }

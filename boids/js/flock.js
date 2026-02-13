@@ -77,6 +77,15 @@ export class Flock {
         }
     }
 
+    getAverageSpeed() {
+        if (this.boids.length === 0) return 0;
+        let total = 0;
+        for (const boid of this.boids) {
+            total += boid.velocity.magnitude();
+        }
+        return total / this.boids.length;
+    }
+
     reset() {
         this.boids = [];
         this.predators = [];

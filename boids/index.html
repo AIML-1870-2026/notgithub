@@ -9,62 +9,120 @@
 <body>
     <canvas id="canvas"></canvas>
 
+    <!-- Stats HUD (top-left) -->
+    <div id="stats">
+        <div class="stat-row">
+            <span class="stat-label">FPS</span>
+            <span class="stat-value" id="fpsValue">60</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Boids</span>
+            <span class="stat-value" id="boidCountStat">100</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Predators</span>
+            <span class="stat-value" id="predatorCountStat">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Obstacles</span>
+            <span class="stat-value" id="obstacleCountStat">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Avg Speed</span>
+            <span class="stat-value" id="avgSpeedStat">0.0</span>
+        </div>
+    </div>
+
+    <!-- Live Chart -->
+    <div id="chartPanel">
+        <div class="chart-legend">
+            <button class="legend-item active" data-series="fps">
+                <span class="legend-swatch" style="background: #66BB6A"></span>FPS
+            </button>
+            <button class="legend-item active" data-series="avgSpeed">
+                <span class="legend-swatch" style="background: #4FC3F7"></span>Speed
+            </button>
+            <button class="legend-item active" data-series="boids">
+                <span class="legend-swatch" style="background: #FFA726"></span>Boids
+            </button>
+        </div>
+        <canvas id="chartCanvas"></canvas>
+    </div>
+
     <div id="controls">
-        <h2>Boids Simulation</h2>
-
-        <div class="control-group">
-            <label for="boidCount">Boids: <span id="boidCountValue">100</span></label>
-            <input type="range" id="boidCount" min="10" max="300" value="100">
+        <div class="controls-header">
+            <h2>Boids Simulation</h2>
+            <button id="togglePanel" class="icon-btn" data-tooltip="Collapse panel">&#x25BC;</button>
         </div>
 
-        <div class="control-group">
-            <label for="maxSpeed">Max Speed: <span id="maxSpeedValue">4</span></label>
-            <input type="range" id="maxSpeed" min="1" max="10" value="4" step="0.5">
+        <div id="controlsBody">
+            <h3>Presets</h3>
+            <div class="preset-group">
+                <button class="preset-btn active" data-preset="default" data-tooltip="Balanced default settings — a good starting point">Default</button>
+                <button class="preset-btn" data-preset="murmuration" data-tooltip="Large perception radius and high cohesion — mimics starling murmurations">Murmuration</button>
+                <button class="preset-btn" data-preset="school" data-tooltip="Tight alignment and low separation — like a school of fish">School of Fish</button>
+                <button class="preset-btn" data-preset="swarm" data-tooltip="High speed with strong separation — chaotic insect swarm behavior">Swarm</button>
+                <button class="preset-btn" data-preset="lazy" data-tooltip="Slow movement with wide perception — calm, drifting particles">Lazy Drift</button>
+            </div>
+
+            <h3>Population</h3>
+
+            <div class="control-group" data-tooltip="Number of boids in the simulation. More boids = more complex flocking but lower performance.">
+                <label for="boidCount">Boids: <span id="boidCountValue">100</span></label>
+                <input type="range" id="boidCount" min="10" max="300" value="100">
+            </div>
+
+            <h3>Movement</h3>
+
+            <div class="control-group" data-tooltip="Maximum velocity each boid can travel. Higher values create faster, more energetic flocking.">
+                <label for="maxSpeed">Max Speed: <span id="maxSpeedValue">4</span></label>
+                <input type="range" id="maxSpeed" min="1" max="10" value="4" step="0.5">
+            </div>
+
+            <div class="control-group" data-tooltip="How far each boid can 'see' its neighbors. Larger radius = bigger group awareness.">
+                <label for="perceptionRadius">Perception: <span id="perceptionRadiusValue">50</span>px</label>
+                <input type="range" id="perceptionRadius" min="20" max="150" value="50">
+            </div>
+
+            <h3>Flocking Weights</h3>
+
+            <div class="control-group" data-tooltip="Separation: How strongly boids avoid crowding neighbors. Higher = more personal space.">
+                <label for="separationWeight">Separation: <span id="separationWeightValue">1.5</span></label>
+                <input type="range" id="separationWeight" min="0" max="3" value="1.5" step="0.1">
+            </div>
+
+            <div class="control-group" data-tooltip="Alignment: How strongly boids steer towards the average heading of neighbors. Higher = more uniform direction.">
+                <label for="alignmentWeight">Alignment: <span id="alignmentWeightValue">1.0</span></label>
+                <input type="range" id="alignmentWeight" min="0" max="3" value="1" step="0.1">
+            </div>
+
+            <div class="control-group" data-tooltip="Cohesion: How strongly boids steer towards the center of neighbors. Higher = tighter groups.">
+                <label for="cohesionWeight">Cohesion: <span id="cohesionWeightValue">1.0</span></label>
+                <input type="range" id="cohesionWeight" min="0" max="3" value="1" step="0.1">
+            </div>
+
+            <h3>Predators</h3>
+
+            <div class="control-group" data-tooltip="Movement speed of predators. Higher makes predators harder for boids to escape.">
+                <label for="predatorSpeed">Predator Speed: <span id="predatorSpeedValue">4.5</span></label>
+                <input type="range" id="predatorSpeed" min="1" max="10" value="4.5" step="0.5">
+            </div>
+
+            <div class="button-group">
+                <button id="addPredator" data-tooltip="Spawn a predator at a random position">Add Predator</button>
+                <button id="removePredator" data-tooltip="Remove the last added predator">Remove Predator</button>
+            </div>
+
+            <h3>Actions</h3>
+
+            <div class="button-group">
+                <button id="clearObstacles" data-tooltip="Remove all obstacles from the canvas">Clear Obstacles</button>
+                <button id="reset" data-tooltip="Reset everything to current slider values">Reset</button>
+                <button id="pausePlay" data-tooltip="Pause or resume the simulation">Pause</button>
+            </div>
+
+            <p class="hint">Click on canvas to add obstacles<br>Shift+Click to add predator</p>
         </div>
-
-        <div class="control-group">
-            <label for="perceptionRadius">Perception: <span id="perceptionRadiusValue">50</span>px</label>
-            <input type="range" id="perceptionRadius" min="20" max="150" value="50">
-        </div>
-
-        <h3>Flocking Weights</h3>
-
-        <div class="control-group">
-            <label for="separationWeight">Separation: <span id="separationWeightValue">1.5</span></label>
-            <input type="range" id="separationWeight" min="0" max="3" value="1.5" step="0.1">
-        </div>
-
-        <div class="control-group">
-            <label for="alignmentWeight">Alignment: <span id="alignmentWeightValue">1.0</span></label>
-            <input type="range" id="alignmentWeight" min="0" max="3" value="1" step="0.1">
-        </div>
-
-        <div class="control-group">
-            <label for="cohesionWeight">Cohesion: <span id="cohesionWeightValue">1.0</span></label>
-            <input type="range" id="cohesionWeight" min="0" max="3" value="1" step="0.1">
-        </div>
-
-        <h3>Predators</h3>
-
-        <div class="control-group">
-            <label for="predatorSpeed">Predator Speed: <span id="predatorSpeedValue">4.5</span></label>
-            <input type="range" id="predatorSpeed" min="1" max="10" value="4.5" step="0.5">
-        </div>
-
-        <div class="button-group">
-            <button id="addPredator">Add Predator</button>
-            <button id="removePredator">Remove Predator</button>
-        </div>
-
-        <h3>Actions</h3>
-
-        <div class="button-group">
-            <button id="clearObstacles">Clear Obstacles</button>
-            <button id="reset">Reset</button>
-            <button id="pausePlay">Pause</button>
-        </div>
-
-        <p class="hint">Click on canvas to add obstacles<br>Shift+Click to add predator</p>
     </div>
 
     <script type="module" src="js/main.js"></script>
