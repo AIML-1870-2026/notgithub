@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decision Neuron — Should I Work Out Today?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Header -->
+<header class="app-header">
+  <h1><span>Decision</span> Neuron</h1>
+  <p id="headerSubtitle">Explore how a single neuron makes decisions</p>
+</header>
+
+<!-- Scenario Bar (Stretch 1) -->
+<div class="scenario-bar">
+  <label>Scenario:</label>
+  <button class="scenario-btn active" data-scenario="workout">Work Out?</button>
+  <button class="scenario-btn" data-scenario="cook">Cook or Order?</button>
+  <button class="scenario-btn" data-scenario="study">Study or Game?</button>
+  <button class="scenario-btn" data-scenario="roadtrip">Road Trip?</button>
+  <button class="scenario-btn custom-btn" data-scenario="custom">+ Custom</button>
+</div>
+
+<!-- Main Layout -->
+<div class="main-grid">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+
+    <!-- Output (prominent) -->
+    <div class="card output-card">
+      <div class="card-title">Decision Output</div>
+      <div class="decision-label" id="decisionLabel">Undecided</div>
+      <div class="probability-display" id="probDisplay">0.50</div>
+      <div class="prob-bar">
+        <div class="prob-bar-fill" id="probBarFill" style="width:50%"></div>
+      </div>
+      <div class="prob-labels">
+        <span class="prob-no">No</span>
+        <span class="prob-yes">Yes</span>
+      </div>
+      <div class="math-display" id="mathDisplay">z = Σ(wᵢxᵢ) + b → σ(z)</div>
+    </div>
+
+    <!-- Neuron Viz -->
+    <div class="card">
+      <div class="card-title">Neuron</div>
+      <canvas class="neuron-viz" id="neuronViz"></canvas>
+    </div>
+
+    <!-- Inputs -->
+    <div class="card">
+      <div class="card-title">Inputs</div>
+      <div id="inputSliders"></div>
+    </div>
+
+    <!-- Weights & Bias -->
+    <div class="card">
+      <div class="card-title">Weights & Bias</div>
+      <div id="weightsDisplay"></div>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <main class="content">
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="training">Training</button>
+      <button class="tab-btn" data-tab="heatmap">Heatmap</button>
+      <button class="tab-btn" data-tab="activation">Activations</button>
+      <button class="tab-btn" data-tab="chain">Neuron Chain</button>
+      <button class="tab-btn" data-tab="sensitivity">Sensitivity</button>
+    </nav>
+
+    <!-- Training Tab -->
+    <div class="tab-panel active" id="tab-training">
+      <div class="training-controls">
+        <button class="label-toggle yes" id="labelToggle" title="Click to toggle Yes/No label">
+          <span id="labelIcon">✓</span> <span id="labelText">Yes</span>
+        </button>
+        <button class="train-btn primary" id="stepBtn" title="Single training step">Step</button>
+        <button class="train-btn primary" id="trainBtn" title="Auto-train multiple steps">Train</button>
+        <button class="train-btn danger" id="resetBtn" title="Clear all points and reset weights">Reset</button>
+        <div class="speed-control">
+          <span>Speed:</span>
+          <input type="range" id="speedSlider" min="1" max="20" value="5">
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-label">Steps</div><div class="stat-value" id="stepCount">0</div></div>
+        <div class="stat-box"><div class="stat-label">Accuracy</div><div class="stat-value" id="accuracy">—</div></div>
+        <div class="stat-box"><div class="stat-label">Loss</div><div class="stat-value" id="lossDisplay">—</div></div>
+        <div class="stat-box"><div class="stat-label">Points</div><div class="stat-value" id="pointCount">0</div></div>
+      </div>
+      <div class="training-canvas-wrapper">
+        <canvas id="trainingCanvas" height="450"></canvas>
+      </div>
+    </div>
+
+    <!-- Heatmap Tab (Stretch 2) -->
+    <div class="tab-panel" id="tab-heatmap">
+      <div class="axis-selectors">
+        <div class="axis-select">
+          <label>X Axis:</label>
+          <select id="heatmapX"></select>
+        </div>
+        <div class="axis-select">
+          <label>Y Axis:</label>
+          <select id="heatmapY"></select>
+        </div>
+      </div>
+      <div class="heatmap-canvas-wrapper">
+        <canvas id="heatmapCanvas" height="450"></canvas>
+      </div>
+    </div>
+
+    <!-- Activation Tab (Stretch 3) -->
+    <div class="tab-panel" id="tab-activation">
+      <div class="activation-grid">
+        <div class="activation-card active" data-activation="sigmoid">
+          <h4>Sigmoid</h4>
+          <div class="formula">σ(z) = 1/(1+e⁻ᶻ)</div>
+          <div class="act-output" id="sigmoidOut">0.50</div>
+        </div>
+        <div class="activation-card" data-activation="step">
+          <h4>Step</h4>
+          <div class="formula">f(z) = z ≥ 0 ? 1 : 0</div>
+          <div class="act-output" id="stepOut">1</div>
+        </div>
+        <div class="activation-card" data-activation="relu">
+          <h4>ReLU</h4>
+          <div class="formula">f(z) = max(0, z)</div>
+          <div class="act-output" id="reluOut">0.00</div>
+        </div>
+      </div>
+      <div class="activation-canvas-wrapper">
+        <canvas id="activationCanvas" height="350"></canvas>
+      </div>
+    </div>
+
+    <!-- Two-Neuron Chain Tab (Stretch 4) -->
+    <div class="tab-panel" id="tab-chain">
+      <div class="chain-layout">
+        <div class="neuron-card">
+          <h4><span class="dot" style="background:var(--accent)"></span> Neuron 1</h4>
+          <div class="stat-box" style="margin-bottom:0.75rem"><div class="stat-label">Output</div><div class="stat-value" id="n1Output">0.50</div></div>
+          <div style="font-size:0.75rem;color:var(--text-muted)">Uses main inputs & weights</div>
+        </div>
+        <div class="synapse-connector">
+          <canvas id="synapseCanvas" width="80" height="200"></canvas>
+          <div>
+            <div style="font-size:0.7rem;color:var(--text-muted);text-align:center">Synapse Weight</div>
+            <input type="range" id="synapseWeight" min="-3" max="3" step="0.1" value="1" style="width:80px">
+            <div class="synapse-weight" id="synapseWeightVal">1.0</div>
+          </div>
+        </div>
+        <div class="neuron-card">
+          <h4><span class="dot" style="background:var(--magenta)"></span> Neuron 2</h4>
+          <div class="stat-box" style="margin-bottom:0.75rem"><div class="stat-label">Final Output</div><div class="stat-value" id="n2Output" style="color:var(--magenta)">0.50</div></div>
+          <div class="input-group">
+            <div class="input-label"><span>Extra Input</span><span class="value" id="n2ExtraVal">0.50</span></div>
+            <input type="range" id="n2Extra" min="0" max="1" step="0.01" value="0.5">
+          </div>
+          <div class="input-group">
+            <div class="input-label"><span>Extra Weight</span><span class="value" id="n2ExtraWVal">0.50</span></div>
+            <input type="range" id="n2ExtraW" min="-3" max="3" step="0.1" value="0.5">
+          </div>
+          <div class="input-group">
+            <div class="input-label"><span>Bias 2</span><span class="value" id="n2BiasVal">0.00</span></div>
+            <input type="range" id="n2Bias" min="-3" max="3" step="0.1" value="0">
+          </div>
+        </div>
+      </div>
+      <div class="chain-math" id="chainMath"></div>
+    </div>
+
+    <!-- Sensitivity Tab (Stretch 5) -->
+    <div class="tab-panel" id="tab-sensitivity">
+      <div class="sensitivity-canvas-wrapper">
+        <canvas id="sensitivityCanvas" height="350"></canvas>
+      </div>
+      <div class="sensitivity-bar-wrapper" style="margin-top:1rem">
+        <canvas id="sensitivityBarCanvas" height="200"></canvas>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Custom Scenario Modal -->
+<div class="modal-overlay" id="customModal">
+  <div class="modal">
+    <h3>Create Custom Scenario</h3>
+    <div class="modal-field">
+      <label>Decision Question</label>
+      <input type="text" id="customQuestion" placeholder="e.g. Should I adopt this pet?">
+    </div>
+    <div class="modal-field">
+      <label>Yes Label</label>
+      <input type="text" id="customYes" placeholder="e.g. Adopt!">
+    </div>
+    <div class="modal-field">
+      <label>No Label</label>
+      <input type="text" id="customNo" placeholder="e.g. Not yet">
+    </div>
+    <div class="modal-field">
+      <label>Inputs (3–5)</label>
+      <div id="customInputs"></div>
+      <button class="train-btn" id="addInputBtn" style="margin-top:0.5rem">+ Add Input</button>
+    </div>
+    <div class="modal-field">
+      <label>Default Bias</label>
+      <input type="range" id="customBias" min="-3" max="3" step="0.1" value="0.5">
+      <span id="customBiasVal" style="font-family:var(--mono);font-size:0.8rem;color:var(--accent)">0.5</span>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn" id="cancelModal">Cancel</button>
+      <button class="modal-btn primary" id="createScenario">Create Scenario</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts (load order matters) -->
+<script src="js/scenarios.js"></script>
+<script src="js/state.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/neuron-viz.js"></script>
+<script src="js/training.js"></script>
+<script src="js/heatmap.js"></script>
+<script src="js/activation.js"></script>
+<script src="js/chain.js"></script>
+<script src="js/sensitivity.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
