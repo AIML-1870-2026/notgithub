@@ -49,6 +49,25 @@ function heatmapColor(p) {
   return lerpColor('#ffffff', '#e879f9', (p - 0.5) * 2);
 }
 
+function showToast(message, type = 'info') {
+  const container = $('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (type === 'warning' ? ' warning' : '');
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 2600);
+}
+
+function updateCanvasHint() {
+  const hint = $('canvasHint');
+  if (!hint) return;
+  if (state.trainingPoints.length > 0) {
+    hint.classList.add('hidden');
+  } else {
+    hint.classList.remove('hidden');
+  }
+}
+
 function resizeCanvas(canvas, desiredHeight) {
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.parentElement.getBoundingClientRect();

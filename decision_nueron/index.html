@@ -83,9 +83,9 @@
         <button class="label-toggle yes" id="labelToggle" title="Click to toggle Yes/No label">
           <span id="labelIcon">✓</span> <span id="labelText">Yes</span>
         </button>
-        <button class="train-btn primary" id="stepBtn" title="Single training step">Step</button>
-        <button class="train-btn primary" id="trainBtn" title="Auto-train multiple steps">Train</button>
-        <button class="train-btn danger" id="resetBtn" title="Clear all points and reset weights">Reset</button>
+        <button class="train-btn primary" id="stepBtn" title="Run one gradient descent step on your training points">Step</button>
+        <button class="train-btn primary" id="trainBtn" title="Continuously train — click again to stop">Train</button>
+        <button class="train-btn danger" id="resetBtn" title="Clear all training points and reset weights to defaults">Reset</button>
         <div class="speed-control">
           <span>Speed:</span>
           <input type="range" id="speedSlider" min="1" max="20" value="5">
@@ -99,6 +99,11 @@
       </div>
       <div class="training-canvas-wrapper">
         <canvas id="trainingCanvas" height="450"></canvas>
+        <div class="canvas-hint" id="canvasHint">
+          <div class="canvas-hint-icon">+</div>
+          <div class="canvas-hint-text">Click anywhere on the canvas to add training points</div>
+          <div class="canvas-hint-sub">Toggle <strong>Yes/No</strong> label above, then click to place points. Use <strong>Step</strong> or <strong>Train</strong> to teach the neuron.</div>
+        </div>
       </div>
     </div>
 
@@ -223,6 +228,8 @@
     </div>
   </div>
 </div>
+
+<div class="toast-container" id="toastContainer"></div>
 
 <!-- Scripts (load order matters) -->
 <script src="js/scenarios.js"></script>

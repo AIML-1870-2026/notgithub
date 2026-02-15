@@ -160,6 +160,7 @@ trainingCanvas.addEventListener('click', (e) => {
     else normed.push(normalize(state.inputs[i], sc.inputs[i].min, sc.inputs[i].max));
   }
   state.trainingPoints.push({ normed, label: state.trainingLabel });
+  updateCanvasHint();
   updateAll();
 });
 
@@ -192,6 +193,10 @@ $('labelToggle').addEventListener('click', () => {
 });
 
 $('stepBtn').addEventListener('click', () => {
+  if (state.trainingPoints.length === 0) {
+    showToast('Add training points first — click on the canvas!', 'warning');
+    return;
+  }
   trainStep();
   updateAll();
   buildInputSliders();
@@ -201,6 +206,10 @@ $('trainBtn').addEventListener('click', () => {
   if (state.isTraining) {
     state.isTraining = false;
     $('trainBtn').textContent = 'Train';
+    return;
+  }
+  if (state.trainingPoints.length === 0) {
+    showToast('Add training points first — click on the canvas!', 'warning');
     return;
   }
   state.isTraining = true;
@@ -226,6 +235,7 @@ $('resetBtn').addEventListener('click', () => {
   state.stepCount = 0;
   state.weights = sc.inputs.map(inp => inp.weight);
   state.bias = sc.bias;
+  updateCanvasHint();
   buildInputSliders();
   updateAll();
 });
