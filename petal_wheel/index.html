@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RGB Petal Wheel — Color Mixing Simulation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Ambient glow that follows selected color -->
+  <div class="ambient-glow" id="ambientGlow"></div>
+
+  <header class="app-header">
+    <h1>Petal Wheel</h1>
+    <p class="subtitle">Explore how screens create every color from just three lights</p>
+  </header>
+
+  <main class="main-layout">
+
+    <!-- ── Centerpiece: three-column hero ── -->
+    <section class="hero">
+
+      <!-- Left: RGB Sliders -->
+      <div class="side-panel side-left">
+        <h2 class="side-label">RGB</h2>
+
+        <div class="slider-group" data-channel="r">
+          <span class="channel-dot" style="--ch: var(--red)"></span>
+          <div class="slider-track-wrap">
+            <div class="slider-track-bg" id="rTrack"></div>
+            <input type="range" id="rSlider" min="0" max="255" value="128" aria-label="Red channel">
+          </div>
+          <input type="number" id="rInput" min="0" max="255" value="128" class="num-input" aria-label="Red value">
+        </div>
+
+        <div class="slider-group" data-channel="g">
+          <span class="channel-dot" style="--ch: var(--green)"></span>
+          <div class="slider-track-wrap">
+            <div class="slider-track-bg" id="gTrack"></div>
+            <input type="range" id="gSlider" min="0" max="255" value="128" aria-label="Green channel">
+          </div>
+          <input type="number" id="gInput" min="0" max="255" value="128" class="num-input" aria-label="Green value">
+        </div>
+
+        <div class="slider-group" data-channel="b">
+          <span class="channel-dot" style="--ch: var(--blue)"></span>
+          <div class="slider-track-wrap">
+            <div class="slider-track-bg" id="bTrack"></div>
+            <input type="range" id="bSlider" min="0" max="255" value="128" aria-label="Blue channel">
+          </div>
+          <input type="number" id="bInput" min="0" max="255" value="128" class="num-input" aria-label="Blue value">
+        </div>
+      </div>
+
+      <!-- Center: Flower -->
+      <div class="flower-center">
+        <div class="flower-ring">
+          <canvas id="wheelCanvas"></canvas>
+        </div>
+        <p class="wheel-hint">Click or drag petals to pick</p>
+      </div>
+
+      <!-- Right: Color Viewer -->
+      <div class="side-panel side-right">
+        <h2 class="side-label">Color</h2>
+        <div class="live-swatch" id="colorSwatch">
+          <span class="swatch-hex mono" id="hexValue">#808080</span>
+        </div>
+        <div class="color-readouts">
+          <button class="readout mono" id="hexCopy" title="Click to copy">#808080</button>
+          <span class="readout mono" id="rgbValue">rgb(128, 128, 128)</span>
+          <span class="readout mono" id="hslValue">hsl(0, 0%, 50%)</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── Collapsible panels ── -->
+
+    <!-- Additive Mixing -->
+    <details class="panel">
+      <summary class="panel-toggle">
+        <span class="panel-title">Additive Color Mixing</span>
+        <span class="panel-hint">Drag the spotlights to see how RGB light combines</span>
+      </summary>
+      <div class="panel-body">
+        <div class="mixing-container">
+          <canvas id="mixingCanvas"></canvas>
+        </div>
+        <div class="mixing-controls">
+          <div class="mixing-legend">
+            <span class="legend-item"><span class="dot" style="background:var(--red)"></span>Red</span>
+            <span class="legend-item"><span class="dot" style="background:var(--green)"></span>Green</span>
+            <span class="legend-item"><span class="dot" style="background:var(--blue)"></span>Blue</span>
+            <span class="legend-sep"></span>
+            <span class="legend-item"><span class="dot" style="background:var(--yellow)"></span>R+G</span>
+            <span class="legend-item"><span class="dot" style="background:var(--cyan)"></span>G+B</span>
+            <span class="legend-item"><span class="dot" style="background:var(--magenta)"></span>R+B</span>
+            <span class="legend-item"><span class="dot" style="background:#fff"></span>All</span>
+          </div>
+          <button class="btn-icon" id="resetMixing" title="Reset positions">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8a6 6 0 0 1 10.89-3.48M14 8a6 6 0 0 1-10.89 3.48" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M13 1v4h-4M3 15v-4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+    </details>
+
+    <!-- Palette Generator -->
+    <details class="panel">
+      <summary class="panel-toggle">
+        <span class="panel-title">Palette Generator</span>
+        <span class="panel-hint">Color harmonies based on your selection</span>
+      </summary>
+      <div class="panel-body">
+        <div class="harmony-tabs" role="tablist">
+          <button class="harmony-btn active" data-harmony="complementary" role="tab" aria-selected="true">Complementary</button>
+          <button class="harmony-btn" data-harmony="analogous" role="tab" aria-selected="false">Analogous</button>
+          <button class="harmony-btn" data-harmony="triadic" role="tab" aria-selected="false">Triadic</button>
+          <button class="harmony-btn" data-harmony="split" role="tab" aria-selected="false">Split-Comp</button>
+          <button class="harmony-btn" data-harmony="tetradic" role="tab" aria-selected="false">Tetradic</button>
+        </div>
+        <div class="palette-swatches" id="paletteSwatches"></div>
+        <button class="btn btn-export" id="exportPalette">Export CSS Variables</button>
+      </div>
+    </details>
+
+    <!-- Accessibility Tools -->
+    <details class="panel">
+      <summary class="panel-toggle">
+        <span class="panel-title">Accessibility Tools</span>
+        <span class="panel-hint">Contrast checker & color blindness simulation</span>
+      </summary>
+      <div class="panel-body">
+        <div class="a11y-grid">
+          <!-- Contrast Checker -->
+          <div class="a11y-panel">
+            <h3 class="section-label">Contrast Checker</h3>
+            <div class="contrast-inputs">
+              <div class="color-pick">
+                <span class="pick-label">Foreground</span>
+                <div class="mini-swatch" id="fgSwatch"></div>
+                <span class="mono pick-hex" id="fgHex">#808080</span>
+              </div>
+              <div class="contrast-vs">vs</div>
+              <div class="color-pick">
+                <span class="pick-label">Background</span>
+                <label class="mini-swatch-wrap">
+                  <input type="color" id="bgPicker" value="#000000" aria-label="Background color">
+                  <div class="mini-swatch" id="bgSwatch" style="background:#000000"></div>
+                </label>
+                <span class="mono pick-hex" id="bgHex">#000000</span>
+              </div>
+            </div>
+            <div class="contrast-result">
+              <div class="ratio-display" id="contrastRatio">&mdash;</div>
+              <div class="wcag-badges">
+                <span class="badge" id="aaSmall">AA</span>
+                <span class="badge" id="aaLarge">AA Lg</span>
+                <span class="badge" id="aaaSmall">AAA</span>
+                <span class="badge" id="aaaLarge">AAA Lg</span>
+              </div>
+            </div>
+            <div class="contrast-preview" id="contrastPreview">
+              <p class="preview-large">Large Text (18pt)</p>
+              <p class="preview-small">Normal body text — does this pass WCAG?</p>
+            </div>
+          </div>
+
+          <!-- Color Blindness Simulator -->
+          <div class="a11y-panel">
+            <h3 class="section-label">Color Blindness Sim</h3>
+            <div class="sim-grid">
+              <div class="sim-card">
+                <div class="sim-swatch" id="normalSwatch"></div>
+                <span class="sim-label">Normal</span>
+              </div>
+              <div class="sim-card">
+                <div class="sim-swatch" id="protanSwatch"></div>
+                <span class="sim-label">Protanopia</span>
+                <span class="sim-desc">No red cones</span>
+              </div>
+              <div class="sim-card">
+                <div class="sim-swatch" id="deutanSwatch"></div>
+                <span class="sim-label">Deuteranopia</span>
+                <span class="sim-desc">No green cones</span>
+              </div>
+              <div class="sim-card">
+                <div class="sim-swatch" id="tritanSwatch"></div>
+                <span class="sim-label">Tritanopia</span>
+                <span class="sim-desc">No blue cones</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="color-math.js"></script>
+  <script src="petal-wheel.js"></script>
+  <script src="mixing-demo.js"></script>
+  <script src="palette.js"></script>
+  <script src="accessibility.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
