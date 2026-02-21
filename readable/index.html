@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Readable — Text Readability Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="ambient-glow" id="ambientGlow"></div>
+
+  <header class="app-header">
+    <h1>Readable</h1>
+    <p class="subtitle">Explore how color and size affect text readability</p>
+  </header>
+
+  <main class="main-layout">
+
+    <!-- ── Two-column hero ── -->
+    <section class="hero">
+
+      <!-- Left: Controls -->
+      <div class="controls-panel">
+
+        <!-- Background Color -->
+        <div class="control-group control-group--color" id="bgGroup">
+          <div class="group-header">
+            <h2 class="group-label">Background Color</h2>
+            <div class="color-chip-row">
+              <div class="color-chip" id="bgChip"></div>
+              <span class="chip-hex mono" id="bgHexLabel">#ffffff</span>
+            </div>
+          </div>
+          <div class="slider-group">
+            <span class="channel-dot" style="--ch: var(--red)"></span>
+            <div class="slider-track-wrap">
+              <div class="slider-track-bg" id="bgRTrack"></div>
+              <input type="range" id="bgRSlider" min="0" max="255" value="255" aria-label="Background red">
+            </div>
+            <input type="number" class="num-input mono" id="bgRInput" min="0" max="255" value="255">
+          </div>
+          <div class="slider-group">
+            <span class="channel-dot" style="--ch: var(--green)"></span>
+            <div class="slider-track-wrap">
+              <div class="slider-track-bg" id="bgGTrack"></div>
+              <input type="range" id="bgGSlider" min="0" max="255" value="255" aria-label="Background green">
+            </div>
+            <input type="number" class="num-input mono" id="bgGInput" min="0" max="255" value="255">
+          </div>
+          <div class="slider-group">
+            <span class="channel-dot" style="--ch: var(--blue)"></span>
+            <div class="slider-track-wrap">
+              <div class="slider-track-bg" id="bgBTrack"></div>
+              <input type="range" id="bgBSlider" min="0" max="255" value="255" aria-label="Background blue">
+            </div>
+            <input type="number" class="num-input mono" id="bgBInput" min="0" max="255" value="255">
+          </div>
+        </div>
+
+        <!-- Text Color -->
+        <div class="control-group control-group--color" id="fgGroup">
+          <div class="group-header">
+            <h2 class="group-label">Text Color</h2>
+            <div class="color-chip-row">
+              <div class="color-chip" id="fgChip"></div>
+              <span class="chip-hex mono" id="fgHexLabel">#1e1e1e</span>
+            </div>
+          </div>
+          <div class="slider-group">
+            <span class="channel-dot" style="--ch: var(--red)"></span>
+            <div class="slider-track-wrap">
+              <div class="slider-track-bg" id="fgRTrack"></div>
+              <input type="range" id="fgRSlider" min="0" max="255" value="30" aria-label="Text red">
+            </div>
+            <input type="number" class="num-input mono" id="fgRInput" min="0" max="255" value="30">
+          </div>
+          <div class="slider-group">
+            <span class="channel-dot" style="--ch: var(--green)"></span>
+            <div class="slider-track-wrap">
+              <div class="slider-track-bg" id="fgGTrack"></div>
+              <input type="range" id="fgGSlider" min="0" max="255" value="30" aria-label="Text green">
+            </div>
+            <input type="number" class="num-input mono" id="fgGInput" min="0" max="255" value="30">
+          </div>
+          <div class="slider-group">
+            <span class="channel-dot" style="--ch: var(--blue)"></span>
+            <div class="slider-track-wrap">
+              <div class="slider-track-bg" id="fgBTrack"></div>
+              <input type="range" id="fgBSlider" min="0" max="255" value="30" aria-label="Text blue">
+            </div>
+            <input type="number" class="num-input mono" id="fgBInput" min="0" max="255" value="30">
+          </div>
+        </div>
+
+        <!-- Text Size -->
+        <div class="control-group" id="sizeGroup">
+          <h2 class="group-label">Text Size</h2>
+          <div class="slider-group slider-group--size">
+            <span class="size-icon">Aa</span>
+            <div class="slider-track-wrap">
+              <div class="slider-track-bg slider-track-bg--size"></div>
+              <input type="range" id="sizeSlider" min="12" max="72" value="18" aria-label="Text size">
+            </div>
+            <div class="size-input-wrap">
+              <input type="number" class="num-input mono" id="sizeInput" min="12" max="72" value="18">
+              <span class="size-unit">px</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats Panel -->
+        <div class="stats-panel">
+          <div class="stat-row stat-row--contrast">
+            <span class="stat-label">Contrast Ratio</span>
+            <span class="stat-value mono" id="contrastDisplay">21.00:1</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">BG Luminance</span>
+            <span class="stat-value mono" id="bgLumDisplay">1.0000</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Text Luminance</span>
+            <span class="stat-value mono" id="fgLumDisplay">0.0000</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: Preview -->
+      <div class="preview-area">
+        <div class="preview-card" id="previewCard">
+          <p class="preview-heading" id="previewHeading">The quick brown fox jumps</p>
+          <p class="preview-body" id="previewBody">Good typography makes reading effortless. This sample paragraph lets you judge how your color and size choices affect real text. Notice how contrast, line spacing, and font size interact — each one matters for sustained reading comfort.</p>
+        </div>
+
+        <!-- WCAG Badges (Stretch B) -->
+        <div class="wcag-badges-row">
+          <span class="badge" id="badgeNormal">PASS — AA Normal</span>
+          <span class="badge" id="badgeLarge">PASS — AA Large</span>
+          <span class="wcag-hint">Normal text: 4.5:1 &nbsp;|&nbsp; Large text (&ge;24px): 3:1</span>
+        </div>
+
+        <!-- ── Vision Simulation (Stretch A) ── -->
+        <section class="vision-section" id="visionSection">
+          <h2 class="section-label">Vision Type Simulation</h2>
+          <div class="radio-group" role="radiogroup" aria-label="Vision type">
+            <label class="radio-pill">
+              <input type="radio" name="vision" value="normal" checked>
+              <span>Normal</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="vision" value="protanopia">
+              <span>Protanopia</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="vision" value="deuteranopia">
+              <span>Deuteranopia</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="vision" value="tritanopia">
+              <span>Tritanopia</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="vision" value="monochromacy">
+              <span>Monochromacy</span>
+            </label>
+          </div>
+          <p class="vision-hint" id="visionHint"></p>
+        </section>
+
+        <!-- ── Preset Schemes (Stretch C) ── -->
+        <section class="presets-section" id="presetsSection">
+          <h2 class="section-label">Preset Color Schemes</h2>
+          <div class="preset-grid" id="presetGrid"></div>
+        </section>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="color-math.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
