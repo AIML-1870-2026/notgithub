@@ -31,8 +31,8 @@
           <div class="group-header">
             <h2 class="group-label">Background Color</h2>
             <div class="color-chip-row">
-              <div class="color-chip" id="bgChip"></div>
-              <span class="chip-hex mono" id="bgHexLabel">#ffffff</span>
+              <div class="color-chip" id="bgChip" title="Current background color swatch"></div>
+              <span class="chip-hex mono" id="bgHexLabel" title="Hexadecimal color code">#ffffff</span>
             </div>
           </div>
           <div class="slider-group">
@@ -66,8 +66,8 @@
           <div class="group-header">
             <h2 class="group-label">Text Color</h2>
             <div class="color-chip-row">
-              <div class="color-chip" id="fgChip"></div>
-              <span class="chip-hex mono" id="fgHexLabel">#1e1e1e</span>
+              <div class="color-chip" id="fgChip" title="Current text color swatch"></div>
+              <span class="chip-hex mono" id="fgHexLabel" title="Hexadecimal color code">#1e1e1e</span>
             </div>
           </div>
           <div class="slider-group">
@@ -107,7 +107,7 @@
             </div>
             <div class="size-input-wrap">
               <input type="number" class="num-input mono" id="sizeInput" min="12" max="72" value="18">
-              <span class="size-unit">px</span>
+              <span class="size-unit" title="Pixels — unit of measurement for screen text size">px</span>
             </div>
           </div>
         </div>
@@ -115,15 +115,15 @@
         <!-- Stats Panel -->
         <div class="stats-panel">
           <div class="stat-row stat-row--contrast">
-            <span class="stat-label">Contrast Ratio</span>
+            <span class="stat-label" title="WCAG contrast ratio — measures the difference in brightness between text and background. Higher is more readable.">Contrast Ratio</span>
             <span class="stat-value mono" id="contrastDisplay">21.00:1</span>
           </div>
           <div class="stat-row">
-            <span class="stat-label">BG Luminance</span>
+            <span class="stat-label" title="Background relative luminance — perceived brightness from 0 (black) to 1 (white), used in WCAG contrast calculations">BG Luminance</span>
             <span class="stat-value mono" id="bgLumDisplay">1.0000</span>
           </div>
           <div class="stat-row">
-            <span class="stat-label">Text Luminance</span>
+            <span class="stat-label" title="Text relative luminance — perceived brightness from 0 (black) to 1 (white), used in WCAG contrast calculations">Text Luminance</span>
             <span class="stat-value mono" id="fgLumDisplay">0.0000</span>
           </div>
         </div>
@@ -139,9 +139,9 @@
 
         <!-- WCAG Badges (Stretch B) -->
         <div class="wcag-badges-row">
-          <span class="badge" id="badgeNormal">PASS — AA Normal</span>
-          <span class="badge" id="badgeLarge">PASS — AA Large</span>
-          <span class="wcag-hint">Normal text: 4.5:1 &nbsp;|&nbsp; Large text (&ge;24px): 3:1</span>
+          <span class="badge" id="badgeNormal" title="WCAG AA Normal — requires at least 4.5:1 contrast ratio for text smaller than 24px">PASS — AA Normal</span>
+          <span class="badge" id="badgeLarge" title="WCAG AA Large — requires at least 3:1 contrast ratio for text 24px or larger">PASS — AA Large</span>
+          <span class="wcag-hint" title="WCAG (Web Content Accessibility Guidelines) — international standard for web accessibility">Normal text: 4.5:1 &nbsp;|&nbsp; Large text (&ge;24px): 3:1</span>
         </div>
 
         <!-- ── Vision Simulation (Stretch A) ── -->
@@ -152,19 +152,19 @@
               <input type="radio" name="vision" value="normal" checked>
               <span>Normal</span>
             </label>
-            <label class="radio-pill">
+            <label class="radio-pill" title="Red-blind — no L-cones (long wavelength), affects ~1% of males">
               <input type="radio" name="vision" value="protanopia">
               <span>Protanopia</span>
             </label>
-            <label class="radio-pill">
+            <label class="radio-pill" title="Green-blind — no M-cones (medium wavelength), the most common color blindness (~5% of males)">
               <input type="radio" name="vision" value="deuteranopia">
               <span>Deuteranopia</span>
             </label>
-            <label class="radio-pill">
+            <label class="radio-pill" title="Blue-blind — no S-cones (short wavelength), very rare (<0.01% of population)">
               <input type="radio" name="vision" value="tritanopia">
               <span>Tritanopia</span>
             </label>
-            <label class="radio-pill">
+            <label class="radio-pill" title="Total color blindness — sees only shades of gray, extremely rare">
               <input type="radio" name="vision" value="monochromacy">
               <span>Monochromacy</span>
             </label>
