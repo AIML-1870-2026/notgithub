@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Spike Jumper</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='4' y='4' width='24' height='24' rx='2' fill='%234488ff'/><circle cx='11' cy='14' r='3' fill='white'/><circle cx='21' cy='14' r='3' fill='white'/><circle cx='12' cy='14' r='1.5' fill='%23111'/><circle cx='22' cy='14' r='1.5' fill='%23111'/></svg>">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+
+        <!-- Main Menu Overlay -->
+        <div id="menu-overlay" class="overlay visible"></div>
+
+        <!-- Pause Overlay -->
+        <div id="pause-overlay" class="overlay">
+            <div class="pause-content">
+                <h2 class="pause-title">PAUSED</h2>
+                <div class="pause-buttons">
+                    <button class="menu-btn primary" id="btn-resume">
+                        <span class="btn-icon">&#9654;</span> RESUME
+                    </button>
+                    <button class="menu-btn" id="btn-restart">
+                        <span class="btn-icon">&#8635;</span> RESTART
+                    </button>
+                    <button class="menu-btn" id="btn-quit">
+                        <span class="btn-icon">&#8592;</span> QUIT
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level Complete Overlay -->
+        <div id="complete-overlay" class="overlay">
+            <div class="complete-content">
+                <h2 class="complete-title">LEVEL COMPLETE!</h2>
+                <p class="complete-level-name" id="complete-level-name">Neon Genesis</p>
+                <div class="complete-stats">
+                    Completed in <span class="stat-value" id="complete-attempts">1</span> attempts
+                </div>
+                <div class="complete-buttons">
+                    <button class="menu-btn" id="btn-complete-restart">
+                        <span class="btn-icon">&#8635;</span> REPLAY
+                    </button>
+                    <button class="menu-btn primary" id="btn-complete-menu">
+                        <span class="btn-icon">&#8592;</span> MENU
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
