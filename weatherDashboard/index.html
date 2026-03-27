@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <div class="header-left">
+                <h1 class="app-title">Weather</h1>
+            </div>
+            <div class="header-center">
+                <div class="search-container">
+                    <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" id="city-search" placeholder="Search city..." autocomplete="off">
+                    <div id="search-results" class="search-results hidden"></div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="unit-toggle" id="unit-toggle" title="Switch between Imperial and Metric units">
+                    <button class="unit-btn active" data-unit="imperial" title="Imperial — °F, mph">°F</button>
+                    <button class="unit-btn" data-unit="metric" title="Metric — °C, m/s">°C</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="favorites-bar" id="favorites-bar">
+            <div class="favorites-scroll" id="favorites-scroll"></div>
+        </div>
+
+        <main class="dashboard">
+            <section class="card current-weather" id="current-weather">
+                <div class="loading-skeleton"></div>
+            </section>
+
+            <section class="card forecast-hourly" id="forecast-hourly">
+                <h3 class="card-title">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    3-Hour Forecast
+                </h3>
+                <div class="hourly-scroll" id="hourly-scroll">
+                    <div class="loading-skeleton"></div>
+                </div>
+            </section>
+
+            <section class="card aqi-card" id="aqi-card">
+                <div class="loading-skeleton"></div>
+            </section>
+
+            <section class="card forecast-daily" id="forecast-daily">
+                <h3 class="card-title">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    5-Day Forecast
+                </h3>
+                <div id="daily-forecast-list">
+                    <div class="loading-skeleton"></div>
+                </div>
+            </section>
+
+            <section class="card weather-details" id="weather-details">
+                <h3 class="card-title">Details</h3>
+                <div class="details-grid" id="details-grid">
+                    <div class="loading-skeleton"></div>
+                </div>
+            </section>
+
+            <section class="card map-card" id="map-card">
+                <h3 class="card-title">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+                    Weather Map
+                </h3>
+                <div class="map-layer-toggle" id="map-layer-toggle">
+                    <button class="layer-btn active" data-layer="temp_new">Temperature</button>
+                    <button class="layer-btn" data-layer="precipitation_new">Precipitation</button>
+                </div>
+                <div id="weather-map"></div>
+            </section>
+        </main>
+    </div>
+
+    <div id="error-toast" class="error-toast hidden"></div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

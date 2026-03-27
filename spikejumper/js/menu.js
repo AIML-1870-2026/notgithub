@@ -71,23 +71,29 @@ function updateScreen(screen) {
 function renderTitleScreen(el) {
     el.innerHTML = `
         <div class="menu-content title-screen">
-            <h1 class="game-title">SPIKE<span class="title-accent">JUMPER</span></h1>
-            <p class="title-subtitle">Navigate the neon gauntlet</p>
-            <div class="menu-buttons">
-                <button class="menu-btn primary" id="btn-play">
-                    <span class="btn-icon">&#9654;</span> PLAY
-                </button>
-                <button class="menu-btn" id="btn-level-select">
-                    <span class="btn-icon">&#9776;</span> LEVELS
-                </button>
-                <button class="menu-btn" id="btn-settings">
-                    <span class="btn-icon">&#9881;</span> SETTINGS
-                </button>
-                <button class="menu-btn" id="btn-scores">
-                    <span class="btn-icon">&#9733;</span> SCORES
-                </button>
+            <div class="title-hero">
+                <img src="assets/PixelElmwoodEntrance.jpg" alt="Elmwood Park Entrance" class="title-hero-img">
+                <div class="title-hero-overlay"></div>
             </div>
-            <p class="controls-hint">SPACE or TAP to jump</p>
+            <div class="title-body">
+                <h1 class="game-title">SPIKE<span class="title-accent">JUMPER</span></h1>
+                <p class="title-subtitle">Navigate the neon gauntlet</p>
+                <div class="menu-buttons">
+                    <button class="menu-btn primary" id="btn-play">
+                        <span class="btn-icon">&#9654;</span> PLAY
+                    </button>
+                    <button class="menu-btn" id="btn-level-select">
+                        <span class="btn-icon">&#9776;</span> LEVELS
+                    </button>
+                    <button class="menu-btn" id="btn-settings">
+                        <span class="btn-icon">&#9881;</span> SETTINGS
+                    </button>
+                    <button class="menu-btn" id="btn-scores">
+                        <span class="btn-icon">&#9733;</span> SCORES
+                    </button>
+                </div>
+                <p class="controls-hint">SPACE or TAP to jump</p>
+            </div>
         </div>
     `;
 
