@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEOWatch — Near-Earth Object Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Three.js MUST be 0.128.0 — globe.gl 2.45.1 was compiled against this exact version -->
+  <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/globe.gl@2.45.1/dist/globe.gl.min.js"></script>
+  <!-- D3 v7 for all tab visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════
+       HEADER
+  ══════════════════════════════════════════ -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <svg class="logo-icon" width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="11" r="4" fill="#00d4ff"/>
+          <circle cx="11" cy="11" r="8" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="3 2"/>
+          <circle cx="11" cy="11" r="10.5" stroke="#00d4ff" stroke-width="0.5" opacity="0.4"/>
+        </svg>
+        <span class="logo-text">NEO<span class="logo-accent">Watch</span></span>
+      </div>
+      <div class="header-meta">
+        <span class="live-indicator">
+          <span class="pulse-dot"></span>
+          LIVE
+        </span>
+        <span id="last-updated" class="last-updated"></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════
+       TAB NAVIGATION
+  ══════════════════════════════════════════ -->
+  <nav class="tab-nav" role="tablist" aria-label="Dashboard sections">
+    <button class="tab-btn active" data-tab="globe" role="tab" aria-selected="true" aria-controls="tab-globe">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" class="tab-icon-svg">
+        <circle cx="7.5" cy="7.5" r="6.5" stroke="currentColor" stroke-width="1.2" fill="none"/>
+        <ellipse cx="7.5" cy="7.5" rx="3" ry="6.5" stroke="currentColor" stroke-width="1" fill="none"/>
+        <line x1="1" y1="7.5" x2="14" y2="7.5" stroke="currentColor" stroke-width="1"/>
+      </svg>
+      <span class="tab-label">3D Earth</span>
+    </button>
+    <button class="tab-btn" data-tab="today" role="tab" aria-selected="false" aria-controls="tab-today">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" class="tab-icon-svg">
+        <circle cx="7.5" cy="7.5" r="2.5" fill="currentColor"/>
+        <path d="M7.5 1v2M7.5 12v2M1 7.5h2M12 7.5h2M2.9 2.9l1.4 1.4M10.7 10.7l1.4 1.4M10.7 2.9l-1.4 1.4M4.3 10.7l-1.4 1.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <span class="tab-label">Today's Approaches</span>
+    </button>
+    <button class="tab-btn" data-tab="hazard" role="tab" aria-selected="false" aria-controls="tab-hazard">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" class="tab-icon-svg">
+        <path d="M7.5 1.5L13.5 12.5H1.5L7.5 1.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        <line x1="7.5" y1="6" x2="7.5" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        <circle cx="7.5" cy="10.8" r="0.7" fill="currentColor"/>
+      </svg>
+      <span class="tab-label">Hazard Rankings</span>
+    </button>
+    <button class="tab-btn" data-tab="history" role="tab" aria-selected="false" aria-controls="tab-history">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" class="tab-icon-svg">
+        <circle cx="7.5" cy="7.5" r="6" stroke="currentColor" stroke-width="1.2"/>
+        <path d="M7.5 4.5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="tab-label">Historical Timeline</span>
+    </button>
+    <button class="tab-btn" data-tab="size" role="tab" aria-selected="false" aria-controls="tab-size">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" class="tab-icon-svg">
+        <circle cx="4" cy="7.5" r="2.5" stroke="currentColor" stroke-width="1.2"/>
+        <circle cx="11" cy="7.5" r="3.5" stroke="currentColor" stroke-width="1.2"/>
+        <line x1="1" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+      <span class="tab-label">Size Comparisons</span>
+    </button>
+  </nav>
+
+  <!-- ══════════════════════════════════════════
+       MAIN CONTENT AREA
+  ══════════════════════════════════════════ -->
+  <main class="content-area">
+
+    <!-- ─────────── TAB 1: 3D GLOBE ─────────── -->
+    <section id="tab-globe" class="tab-panel active" role="tabpanel" aria-labelledby="tab-globe-btn">
+      <div id="globe-container"></div>
+
+      <!-- Floating info panel — appears on asteroid click -->
+      <aside id="globe-info-panel" class="globe-info hidden">
+        <button id="globe-info-close" class="close-btn" aria-label="Close info panel">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <line x1="1" y1="1" x2="11" y2="11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="11" y1="1" x2="1" y2="11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div class="info-badge" id="info-hazard-badge"></div>
+        <h3 id="info-name" class="info-title"></h3>
+        <dl class="info-grid">
+          <dt>Miss Distance</dt>
+          <dd id="info-dist"></dd>
+          <dt>Velocity</dt>
+          <dd id="info-vel"></dd>
+          <dt>Est. Diameter</dt>
+          <dd id="info-diam"></dd>
+          <dt>Close Approach</dt>
+          <dd id="info-date"></dd>
+        </dl>
+        <a id="info-jpl-link" href="#" target="_blank" rel="noopener noreferrer" class="btn-jpl">
+          View in JPL Database
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+            <path d="M2 9L9 2M9 2H4M9 2v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </aside>
+
+      <!-- Globe legend -->
+      <div class="globe-legend">
+        <span class="legend-item">
+          <span class="dot dot-hazard"></span>
+          Potentially Hazardous
+        </span>
+        <span class="legend-item">
+          <span class="dot dot-safe"></span>
+          Safe Approach
+        </span>
+        <span class="legend-item">
+          <span class="dot dot-moon"></span>
+          ~Lunar Orbit
+        </span>
+      </div>
+
+      <!-- Globe header overlay -->
+      <div class="globe-overlay-header">
+        <p class="globe-subtitle">Asteroids scaled by miss distance — click any object for details</p>
+      </div>
+    </section>
+
+    <!-- ─────────── TAB 2: TODAY'S APPROACHES ─────────── -->
+    <section id="tab-today" class="tab-panel" role="tabpanel" aria-labelledby="tab-today-btn">
+      <div class="panel-header">
+        <div class="panel-header-text">
+          <h2 class="panel-title">7-Day Close Approaches</h2>
+          <p class="panel-sub">Near-Earth objects passing within 0.3 AU over the next 7 days</p>
+        </div>
+        <div id="today-stats" class="stats-row"></div>
+      </div>
+
+      <div class="controls-bar">
+        <label class="toggle-wrap">
+          <input type="checkbox" id="filter-hazardous" class="toggle-input" />
+          <span class="toggle-track">
+            <span class="toggle-thumb"></span>
+          </span>
+          <span class="toggle-label">Hazardous only</span>
+        </label>
+        <div class="select-wrap">
+          <select id="sort-today" class="select-chip" aria-label="Sort by">
+            <option value="date">Sort by Date</option>
+            <option value="dist">Sort by Distance</option>
+            <option value="size">Sort by Size</option>
+            <option value="vel">Sort by Velocity</option>
+          </select>
+          <svg class="select-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none">
+            <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div id="today-orbit-wrap" class="orbit-wrap">
+        <svg id="today-orbit-svg"></svg>
+      </div>
+      <!-- D3 tooltip (shared across tabs) -->
+      <div id="d3-tooltip" class="d3-tooltip hidden"></div>
+    </section>
+
+    <!-- ─────────── TAB 3: HAZARD RANKINGS ─────────── -->
+    <section id="tab-hazard" class="tab-panel" role="tabpanel" aria-labelledby="tab-hazard-btn">
+      <div class="panel-header">
+        <div class="panel-header-text">
+          <h2 class="panel-title">Hazard Rankings</h2>
+          <p class="panel-sub">JPL Sentry-monitored objects ranked by cumulative Palermo Scale impact probability</p>
+        </div>
+        <div class="hazard-legend-row">
+          <span class="scale-chip scale-high">PS &gt; −2 High</span>
+          <span class="scale-chip scale-low">PS &lt; −2 Low</span>
+        </div>
+      </div>
+
+      <div class="hazard-layout">
+        <div id="hazard-list" class="hazard-list"></div>
+        <div class="hazard-chart-card">
+          <div class="chart-card-header">
+            <span class="chart-card-title">Palermo Scale (Top 20)</span>
+            <span class="chart-card-sub">Negative = below background risk</span>
+          </div>
+          <div class="hazard-chart-wrap">
+            <svg id="hazard-bubble-svg"></svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────── TAB 4: HISTORICAL TIMELINE ─────────── -->
+    <section id="tab-history" class="tab-panel" role="tabpanel" aria-labelledby="tab-history-btn">
+      <div class="panel-header">
+        <div class="panel-header-text">
+          <h2 class="panel-title">Historical Close Approaches</h2>
+          <p class="panel-sub">SBDB archive — objects that passed within 0.05 AU of Earth</p>
+        </div>
+      </div>
+
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <svg class="search-icon-svg" width="15" height="15" viewBox="0 0 15 15" fill="none">
+            <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.3"/>
+            <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input
+            type="text"
+            id="history-search"
+            placeholder="Search by object name or designation…"
+            class="search-input"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button id="history-clear" class="search-clear hidden" aria-label="Clear search">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="date-range-wrap">
+          <input type="date" id="history-date-min" class="date-input" aria-label="Start date" />
+          <span class="date-sep">→</span>
+          <input type="date" id="history-date-max" class="date-input" aria-label="End date" />
+        </div>
+        <button id="history-search-btn" class="btn-primary">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <circle cx="5.5" cy="5.5" r="4.5" stroke="currentColor" stroke-width="1.4"/>
+            <line x1="9" y1="9" x2="12.5" y2="12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          Search
+        </button>
+      </div>
+
+      <div id="history-timeline" class="history-scatter-wrap">
+        <svg id="history-scatter-svg"></svg>
+      </div>
+      <div id="history-pagination" class="pagination"></div>
+    </section>
+
+    <!-- ─────────── TAB 5: SIZE COMPARISONS ─────────── -->
+    <section id="tab-size" class="tab-panel" role="tabpanel" aria-labelledby="tab-size-btn">
+      <div class="panel-header">
+        <div class="panel-header-text">
+          <h2 class="panel-title">Size Comparisons</h2>
+          <p class="panel-sub">Visual scale of near-Earth objects relative to familiar landmarks</p>
+        </div>
+      </div>
+
+      <div class="size-controls">
+        <label class="size-select-label" for="size-neo-select">Compare asteroid:</label>
+        <div class="select-wrap">
+          <select id="size-neo-select" class="select-chip" aria-label="Select asteroid to compare"></select>
+          <svg class="select-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none">
+            <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div id="size-stage" class="size-stage">
+        <svg id="size-circles-svg"></svg>
+      </div>
+      <div id="size-info" class="size-info-bar"></div>
+    </section>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════
+       TOAST NOTIFICATIONS
+  ══════════════════════════════════════════ -->
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Module entry point — ES modules are deferred by default -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
