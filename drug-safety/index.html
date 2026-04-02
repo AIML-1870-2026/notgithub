@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drug Safety Explorer — FDA Data Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <svg class="logo-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="28" height="28" rx="8" fill="#007AFF"/>
+          <path d="M8 14C8 10.686 10.686 8 14 8C17.314 8 20 10.686 20 14C20 17.314 17.314 20 14 20" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <path d="M14 11V14L16 16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="11" cy="19.5" r="1.5" fill="white"/>
+          <path d="M8 17L11 20" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="logo-text">Drug<span class="logo-accent">Safety</span></span>
+      </div>
+      <p class="header-tagline">FDA Adverse Event &amp; Recall Explorer</p>
+    </div>
+  </header>
+
+  <!-- TAB NAVIGATION -->
+  <nav class="tab-nav" role="tablist" aria-label="Dashboard sections">
+    <div class="tab-nav-inner">
+      <button class="tab-btn active" data-tab="search" role="tab" aria-selected="true" aria-controls="tab-search">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M11 11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span>Drug Search</span>
+      </button>
+      <button class="tab-btn" data-tab="compare" role="tab" aria-selected="false" aria-controls="tab-compare">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <rect x="1" y="4" width="6" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+          <rect x="9" y="4" width="6" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <span>Compare</span>
+      </button>
+      <button class="tab-btn" data-tab="timeline" role="tab" aria-selected="false" aria-controls="tab-timeline">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M2 8H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="5" cy="8" r="2" fill="currentColor"/>
+          <circle cx="11" cy="8" r="2" fill="currentColor"/>
+        </svg>
+        <span>Recalls</span>
+      </button>
+      <button class="tab-btn" data-tab="classes" role="tab" aria-selected="false" aria-controls="tab-classes">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <rect x="1" y="9" width="3" height="5" rx="1" fill="currentColor" opacity="0.4"/>
+          <rect x="6" y="6" width="3" height="8" rx="1" fill="currentColor" opacity="0.7"/>
+          <rect x="11" y="3" width="3" height="11" rx="1" fill="currentColor"/>
+        </svg>
+        <span>Drug Classes</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="content-area">
+
+    <!-- ── TAB 1: DRUG SEARCH ── -->
+    <section id="tab-search" class="tab-panel active" role="tabpanel" aria-labelledby="tab-btn-search">
+
+      <div class="panel-hero">
+        <h1 class="panel-title">Adverse Event Explorer</h1>
+        <p class="panel-sub">Search any drug to explore FDA adverse event reports and safety data</p>
+      </div>
+
+      <div class="search-row">
+        <div class="search-input-wrap" id="search-wrap-1">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" stroke="#6E6E73" stroke-width="1.5"/>
+            <path d="M11 11L14 14" stroke="#6E6E73" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input
+            type="text"
+            id="drug-search-input"
+            class="search-input"
+            placeholder="e.g. aspirin, warfarin, lisinopril…"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Search for a drug"
+            aria-autocomplete="list"
+            aria-haspopup="listbox"
+          />
+          <button class="search-clear-btn hidden" id="search-clear-1" aria-label="Clear search">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <div id="autocomplete-list-1" class="autocomplete-dropdown hidden" role="listbox" aria-label="Drug suggestions"></div>
+        </div>
+        <button id="drug-search-btn" class="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M10 10L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Search
+        </button>
+        <button class="btn-help" data-help="faers" aria-label="Learn about FAERS data">?</button>
+      </div>
+
+      <!-- Quick example pills -->
+      <div class="example-pills" id="example-pills-1">
+        <span class="example-label">Try:</span>
+        <button class="pill-btn" data-drug="warfarin">Warfarin</button>
+        <button class="pill-btn" data-drug="ibuprofen">Ibuprofen</button>
+        <button class="pill-btn" data-drug="lisinopril">Lisinopril</button>
+        <button class="pill-btn" data-drug="atorvastatin">Atorvastatin</button>
+        <button class="pill-btn" data-drug="metformin">Metformin</button>
+      </div>
+
+      <!-- Summary stat cards -->
+      <div id="search-stats-row" class="stats-row hidden">
+        <div class="stat-card" id="stat-total-events">
+          <div class="stat-icon stat-icon-blue">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M9 2L9 16M2 9L16 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="stat-body">
+            <span class="stat-value" id="val-total-events">—</span>
+            <span class="stat-label">Adverse Event Reports</span>
+          </div>
+          <button class="btn-help-inline" data-help="adverse-events" aria-label="About adverse events">?</button>
+        </div>
+        <div class="stat-card" id="stat-active-recalls">
+          <div class="stat-icon stat-icon-red">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M9 3L16 15H2L9 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M9 8V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="9" cy="13" r="0.75" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="stat-body">
+            <span class="stat-value" id="val-active-recalls">—</span>
+            <span class="stat-label">Recall Records</span>
+          </div>
+          <button class="btn-help-inline" data-help="recalls" aria-label="About recalls">?</button>
+        </div>
+        <div class="stat-card" id="stat-label-warnings">
+          <div class="stat-icon stat-icon-orange">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <rect x="2" y="2" width="14" height="14" rx="3" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M9 6V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="9" cy="12.5" r="0.75" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="stat-body">
+            <span class="stat-value" id="val-label-warnings">—</span>
+            <span class="stat-label">Label Warnings</span>
+          </div>
+          <button class="btn-help-inline" data-help="warnings" aria-label="About label warnings">?</button>
+        </div>
+      </div>
+
+      <!-- Adverse events chart card -->
+      <div id="search-chart-card" class="chart-card hidden">
+        <div class="chart-card-header">
+          <div>
+            <h2 class="chart-card-title">Top Adverse Reactions</h2>
+            <p class="chart-card-sub" id="search-drug-name-label"></p>
+          </div>
+          <span class="chart-badge">FAERS Data</span>
+        </div>
+        <div class="chart-wrap chart-wrap-bar">
+          <canvas id="adverse-bar-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Skeleton / empty states -->
+      <div id="search-skeleton" class="skeleton-area hidden"></div>
+      <div id="search-empty" class="empty-state hidden">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <circle cx="22" cy="22" r="14" stroke="#AEAEB2" stroke-width="2"/>
+          <path d="M31 31L42 42" stroke="#AEAEB2" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <p class="empty-title">Search for a drug to get started</p>
+        <p class="empty-sub">Enter any brand or generic drug name above</p>
+      </div>
+
+    </section>
+
+    <!-- ── TAB 2: COMPARE ── -->
+    <section id="tab-compare" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-compare">
+
+      <div class="panel-hero">
+        <h1 class="panel-title">Side-by-Side Comparison</h1>
+        <p class="panel-sub">Compare adverse event profiles of two drugs simultaneously</p>
+      </div>
+
+      <div class="compare-inputs-row">
+        <div class="compare-drug-input">
+          <label class="compare-label drug-a-label">Drug A</label>
+          <div class="search-input-wrap" id="search-wrap-a">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="7" cy="7" r="5" stroke="#6E6E73" stroke-width="1.5"/>
+              <path d="M11 11L14 14" stroke="#6E6E73" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <input type="text" id="compare-input-a" class="search-input" placeholder="e.g. warfarin" autocomplete="off" spellcheck="false" aria-label="Drug A" />
+            <div id="autocomplete-list-a" class="autocomplete-dropdown hidden" role="listbox"></div>
+          </div>
+        </div>
+        <div class="compare-vs-badge">vs</div>
+        <div class="compare-drug-input">
+          <label class="compare-label drug-b-label">Drug B</label>
+          <div class="search-input-wrap" id="search-wrap-b">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="7" cy="7" r="5" stroke="#6E6E73" stroke-width="1.5"/>
+              <path d="M11 11L14 14" stroke="#6E6E73" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <input type="text" id="compare-input-b" class="search-input" placeholder="e.g. ibuprofen" autocomplete="off" spellcheck="false" aria-label="Drug B" />
+            <div id="autocomplete-list-b" class="autocomplete-dropdown hidden" role="listbox"></div>
+          </div>
+        </div>
+        <button id="compare-btn" class="btn-primary">Compare</button>
+      </div>
+
+      <!-- Quick example pairs -->
+      <div class="example-pills" id="compare-examples">
+        <span class="example-label">Try:</span>
+        <button class="pill-btn compare-pair-btn" data-drug-a="warfarin" data-drug-b="ibuprofen">Warfarin vs Ibuprofen</button>
+        <button class="pill-btn compare-pair-btn" data-drug-a="fluoxetine" data-drug-b="sertraline">Fluoxetine vs Sertraline</button>
+        <button class="pill-btn compare-pair-btn" data-drug-a="lisinopril" data-drug-b="enalapril">Lisinopril vs Enalapril</button>
+      </div>
+
+      <div id="compare-chart-wrap" class="compare-chart-area hidden">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h2 class="chart-card-title">Adverse Reaction Comparison</h2>
+              <p class="chart-card-sub" id="compare-subtitle"></p>
+            </div>
+            <div class="compare-legend" id="compare-legend"></div>
+          </div>
+          <div class="chart-wrap chart-wrap-compare">
+            <svg id="compare-svg" aria-label="Comparison chart"></svg>
+          </div>
+        </div>
+      </div>
+
+      <div id="compare-skeleton" class="skeleton-area hidden"></div>
+      <div id="compare-empty" class="empty-state hidden">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <rect x="4" y="12" width="18" height="24" rx="4" stroke="#AEAEB2" stroke-width="2"/>
+          <rect x="26" y="12" width="18" height="24" rx="4" stroke="#AEAEB2" stroke-width="2"/>
+        </svg>
+        <p class="empty-title">Enter two drugs to compare</p>
+        <p class="empty-sub">See how their adverse event profiles stack up</p>
+      </div>
+
+    </section>
+
+    <!-- ── TAB 3: RECALL TIMELINE ── -->
+    <section id="tab-timeline" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-timeline">
+
+      <div class="panel-hero">
+        <h1 class="panel-title">Recall Timeline</h1>
+        <p class="panel-sub">FDA enforcement actions visualized over time, color-coded by recall class</p>
+      </div>
+
+      <div class="search-row">
+        <div class="search-input-wrap" id="search-wrap-t">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" stroke="#6E6E73" stroke-width="1.5"/>
+            <path d="M11 11L14 14" stroke="#6E6E73" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="timeline-search-input" class="search-input" placeholder="Search drug for recall history…" autocomplete="off" spellcheck="false" aria-label="Search drug for recalls" />
+          <div id="autocomplete-list-t" class="autocomplete-dropdown hidden" role="listbox"></div>
+        </div>
+        <button id="timeline-search-btn" class="btn-primary">Search</button>
+        <button class="btn-help" data-help="recall-classes" aria-label="About recall classifications">?</button>
+      </div>
+
+      <div class="example-pills" id="example-pills-t">
+        <span class="example-label">Try:</span>
+        <button class="pill-btn" data-drug-timeline="metformin">Metformin</button>
+        <button class="pill-btn" data-drug-timeline="ranitidine">Ranitidine</button>
+        <button class="pill-btn" data-drug-timeline="valsartan">Valsartan</button>
+        <button class="pill-btn" data-drug-timeline="losartan">Losartan</button>
+      </div>
+
+      <div id="recall-legend-row" class="recall-legend-row hidden">
+        <span class="recall-chip recall-class-i">
+          <span class="recall-dot-icon"></span>Class I — Most Serious
+        </span>
+        <span class="recall-chip recall-class-ii">
+          <span class="recall-dot-icon"></span>Class II — Moderate Risk
+        </span>
+        <span class="recall-chip recall-class-iii">
+          <span class="recall-dot-icon"></span>Class III — Least Serious
+        </span>
+        <span class="recall-total" id="recall-total-label"></span>
+      </div>
+
+      <div id="timeline-card" class="chart-card hidden">
+        <div class="chart-card-header">
+          <div>
+            <h2 class="chart-card-title">Enforcement Actions</h2>
+            <p class="chart-card-sub" id="timeline-drug-label"></p>
+          </div>
+          <span class="chart-badge chart-badge-warn">FDA Data</span>
+        </div>
+        <div class="timeline-wrap" id="timeline-wrap">
+          <svg id="recall-timeline-svg" aria-label="Recall timeline"></svg>
+        </div>
+      </div>
+
+      <div id="d3-tooltip" class="d3-tooltip hidden" role="tooltip" aria-live="polite"></div>
+
+      <div id="timeline-skeleton" class="skeleton-area hidden"></div>
+      <div id="timeline-empty" class="empty-state hidden">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <path d="M6 24H42" stroke="#AEAEB2" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="16" cy="24" r="4" stroke="#AEAEB2" stroke-width="2"/>
+          <circle cx="32" cy="24" r="4" stroke="#AEAEB2" stroke-width="2"/>
+        </svg>
+        <p class="empty-title">No recalls found</p>
+        <p class="empty-sub" id="timeline-empty-sub">Search a drug to view its recall history</p>
+      </div>
+
+    </section>
+
+    <!-- ── TAB 4: DRUG CLASS EXPLORER ── -->
+    <section id="tab-classes" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-classes">
+
+      <div class="panel-hero">
+        <h1 class="panel-title">Drug Class Explorer</h1>
+        <p class="panel-sub">Aggregated safety profiles for major medication categories</p>
+      </div>
+
+      <div class="class-selector-row" id="class-selector-row">
+        <!-- Injected by classes.js from CONFIG.DRUG_CLASSES -->
+      </div>
+
+      <div id="class-stats-row" class="stats-row hidden">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-blue">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M2 14L6 9L10 12L14 6L17 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="stat-body">
+            <span class="stat-value" id="val-class-events">—</span>
+            <span class="stat-label">Class-Wide Reports</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-purple">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M9 6V9L11 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="stat-body">
+            <span class="stat-value" id="val-class-drugs">—</span>
+            <span class="stat-label">Drugs in Class</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="class-chart-card" class="chart-card hidden">
+        <div class="chart-card-header">
+          <div>
+            <h2 class="chart-card-title" id="class-chart-title">Top Adverse Reactions</h2>
+            <p class="chart-card-sub" id="class-chart-sub"></p>
+          </div>
+          <span class="chart-badge">Aggregated FAERS</span>
+        </div>
+        <div class="chart-wrap chart-wrap-bar">
+          <canvas id="class-bar-canvas"></canvas>
+        </div>
+      </div>
+
+      <div id="class-drug-list" class="class-drug-list hidden">
+        <h3 class="class-drug-list-title">Drugs Included in Analysis</h3>
+        <div id="class-drug-chips" class="class-drug-chips"></div>
+      </div>
+
+      <div id="class-skeleton" class="skeleton-area hidden"></div>
+      <div id="class-empty" class="empty-state hidden">
+        <p class="empty-title">Select a drug class above</p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- HELP MODAL OVERLAY -->
+  <div id="help-overlay" class="help-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <div class="help-modal">
+      <button id="help-close" class="close-btn" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="help-icon-wrap" id="help-icon-wrap"></div>
+      <h3 id="help-title" class="help-title"></h3>
+      <div id="help-body" class="help-body"></div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="disclaimer">
+        <strong>Important:</strong> Data sourced from the FDA OpenFDA API. Adverse event reports are
+        voluntarily submitted to FAERS and do not establish causation. This tool is for
+        educational purposes only and is not intended for medical decision-making.
+      </p>
+      <p class="attribution">
+        Powered by <a href="https://open.fda.gov" target="_blank" rel="noopener noreferrer">OpenFDA</a>
+        &nbsp;·&nbsp; Data from FDA FAERS, Drug Labels &amp; Enforcement Records
+      </p>
+    </div>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

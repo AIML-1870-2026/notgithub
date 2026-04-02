@@ -1,0 +1,221 @@
+/* ════════════════════════════════════════════════════════
+   animations.css — Keyframes, Transitions, Skeletons
+   Drug Safety Explorer
+   ════════════════════════════════════════════════════════ */
+
+/* ── Skeleton Shimmer ── */
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Tab Panel Entrance ── */
+@keyframes panel-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Dropdown ── */
+@keyframes dropdown-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Toast ── */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+}
+
+/* ── Help Modal / Overlay ── */
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ── Spinner ── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.spinner-sm {
+  width: 14px;
+  height: 14px;
+  border-width: 1.5px;
+}
+
+/* ── Stat Value Number Roll ── */
+@keyframes count-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-value.animated {
+  animation: count-in 300ms var(--ease-out) both;
+}
+
+/* ── Chart Card Entrance ── */
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chart-card.entering {
+  animation: card-rise 300ms var(--ease-out) both;
+}
+
+/* ── D3 Circle Entrance ── */
+@keyframes dot-pop {
+  from {
+    opacity: 0;
+    r: 0;
+  }
+  to {
+    opacity: 0.85;
+  }
+}
+
+/* ── Bar Chart Bars ── */
+@keyframes bar-grow-x {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); transform-origin: left; }
+}
+
+/* ── Pulse for loading indicator on stat cards ── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.pulsing {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+/* ── Tab button active indicator slide ── */
+.tab-btn {
+  position: relative;
+}
+
+.tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--accent);
+  border-radius: var(--r-pill);
+  transform: translateX(-50%);
+  transition: width var(--t-std);
+}
+
+/* Subtle hover underline on non-active tabs */
+.tab-btn:hover:not(.active)::after {
+  width: 40%;
+}
+
+/* ── Focus Visible (keyboard nav) ── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* ── Smooth chart card show/hide ── */
+.chart-card,
+.stats-row,
+.recall-legend-row {
+  transition: opacity var(--t-std);
+}
+
+.chart-card.hidden,
+.stats-row.hidden,
+.recall-legend-row.hidden {
+  opacity: 0;
+}
+
+/* ── Autocomplete item hover highlight ── */
+.autocomplete-item {
+  transition:
+    background var(--t-fast),
+    color var(--t-fast);
+}
+
+/* ── Scroll reveal utility (not JS-dependent, purely CSS) ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
