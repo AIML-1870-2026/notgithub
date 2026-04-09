@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Review Generator</title>
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- marked.js for Markdown → HTML rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+  <!-- ── Header ─────────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-brand">
+      <!-- Sparkle / star icon -->
+      <svg class="brand-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 2L14.5 9.5H22L16 14L18.5 21.5L12 17L5.5 21.5L8 14L2 9.5H9.5L12 2Z"
+              fill="currentColor"/>
+      </svg>
+      <span class="brand-name">Review Generator</span>
+    </div>
+
+    <button class="theme-toggle" id="theme-toggle" aria-label="Switch to light mode">
+      <!-- Sun (shown in dark mode) -->
+      <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <!-- Moon (shown in light mode) -->
+      <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+              stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- ── App Layout ──────────────────────────────────────────── -->
+  <div class="app-layout">
+
+    <!-- ── Sidebar ────────────────────────────────────────────── -->
+    <aside class="sidebar" aria-label="Settings">
+      <div class="sidebar-scroll">
+
+        <!-- API Key -->
+        <section class="sidebar-section">
+          <label class="sidebar-label" for="api-key-input">OpenAI API Key</label>
+          <div class="input-group">
+            <input
+              type="password"
+              id="api-key-input"
+              class="input"
+              placeholder="sk-…"
+              autocomplete="off"
+              spellcheck="false"
+              aria-describedby="key-status"
+            >
+            <button class="input-addon" id="key-visibility-btn" aria-label="Show key">
+              <!-- Eye open -->
+              <svg class="icon" id="eye-open-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                      stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+              <!-- Eye closed -->
+              <svg class="icon hidden" id="eye-closed-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22"
+                      stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <div class="key-status" id="key-status" aria-live="polite"></div>
+        </section>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Model Family -->
+        <section class="sidebar-section">
+          <label class="sidebar-label" for="model-family-select">Model Family</label>
+          <div class="select-wrapper">
+            <select id="model-family-select" class="select" aria-label="Select model family">
+              <option value="GPT-4o">GPT-4o</option>
+              <option value="GPT-4 Turbo">GPT-4 Turbo</option>
+              <option value="GPT-3.5">GPT-3.5</option>
+            </select>
+            <svg class="select-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </section>
+
+        <!-- Model -->
+        <section class="sidebar-section">
+          <label class="sidebar-label" for="model-select">Model</label>
+          <div class="select-wrapper">
+            <select id="model-select" class="select" aria-label="Select model"></select>
+            <svg class="select-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </section>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Tone Slider -->
+        <section class="sidebar-section">
+          <div class="param-header">
+            <label class="sidebar-label" for="tone-slider">Tone</label>
+            <span class="param-value" id="tone-label">Balanced</span>
+          </div>
+          <input
+            type="range"
+            id="tone-slider"
+            class="range-slider"
+            min="0" max="100" step="1" value="50"
+            aria-label="Tone: 0 is Professional, 100 is Casual"
+          >
+          <div class="slider-labels">
+            <span class="slider-label-text">Professional</span>
+            <span class="slider-label-text">Casual</span>
+          </div>
+        </section>
+
+        <!-- Length Slider -->
+        <section class="sidebar-section">
+          <div class="param-header">
+            <label class="sidebar-label" for="length-slider">Length</label>
+            <span class="param-value" id="length-label">Moderate</span>
+          </div>
+          <input
+            type="range"
+            id="length-slider"
+            class="range-slider"
+            min="0" max="100" step="1" value="50"
+            aria-label="Length: 0 is Concise, 100 is Detailed"
+          >
+          <div class="slider-labels">
+            <span class="slider-label-text">Concise</span>
+            <span class="slider-label-text">Detailed</span>
+          </div>
+        </section>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Disclaimer -->
+        <div class="sidebar-info">
+          <strong>Educational use only.</strong> AI-generated reviews may not be attributed to real consumers per FTC guidelines. Your API key is kept in memory only and never stored.
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- ── Main Content ────────────────────────────────────────── -->
+    <main class="main-content">
+
+      <!-- Product Input Card -->
+      <div class="card">
+        <h1 class="card-title">Product Review Generator</h1>
+        <p class="card-subtitle">Describe your product and get an AI-generated review instantly.</p>
+
+        <div class="form-grid">
+
+          <!-- Product Name -->
+          <div class="form-field full">
+            <label class="form-label" for="product-name">
+              Product Name <span class="required" aria-hidden="true">*</span>
+            </label>
+            <input
+              type="text"
+              id="product-name"
+              class="form-input"
+              placeholder="e.g. Sony WH-1000XM5 Headphones"
+              autocomplete="off"
+              aria-required="true"
+            >
+          </div>
+
+          <!-- Description -->
+          <div class="form-field full">
+            <label class="form-label" for="product-desc">
+              Product Description <span class="required" aria-hidden="true">*</span>
+            </label>
+            <textarea
+              id="product-desc"
+              class="form-textarea"
+              rows="3"
+              placeholder="Describe what the product does, who it's for, and any key selling points…"
+              aria-required="true"
+            ></textarea>
+          </div>
+
+          <!-- Category -->
+          <div class="form-field">
+            <label class="form-label" for="product-category">Category <span style="font-weight:400;color:var(--text-3)">(optional)</span></label>
+            <input
+              type="text"
+              id="product-category"
+              class="form-input"
+              placeholder="e.g. Electronics, Clothing, Software…"
+              autocomplete="off"
+            >
+          </div>
+
+          <!-- Key Features -->
+          <div class="form-field">
+            <label class="form-label" for="product-features">Key Features <span style="font-weight:400;color:var(--text-3)">(optional)</span></label>
+            <input
+              type="text"
+              id="product-features"
+              class="form-input"
+              placeholder="e.g. 30hr battery, noise canceling, USB-C…"
+              autocomplete="off"
+            >
+          </div>
+
+        </div>
+
+        <!-- Generate CTA -->
+        <div class="generate-wrap">
+          <button class="btn-primary" id="generate-btn" disabled aria-label="Generate review">
+            <span id="generate-spinner" class="spinner" hidden aria-hidden="true"></span>
+            <svg class="btn-icon" id="generate-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 2L14.5 9.5H22L16 14L18.5 21.5L12 17L5.5 21.5L8 14L2 9.5H9.5L12 2Z"
+                    fill="currentColor"/>
+            </svg>
+            <span id="generate-text">Generate Review</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Output Section (hidden until first generation) -->
+      <section class="output-section" id="output-section" hidden>
+
+        <div class="output-header">
+          <h2 class="output-title">Generated Review</h2>
+          <div class="output-actions">
+            <button class="btn-ghost" id="regenerate-btn" hidden aria-label="Regenerate review">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <polyline points="23 4 23 10 17 10" stroke="currentColor" stroke-width="1.5"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"
+                      stroke="currentColor" stroke-width="1.5"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Regenerate
+            </button>
+            <button class="btn-ghost" id="copy-btn" hidden aria-label="Copy review to clipboard">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2"
+                      stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                      stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+              Copy
+            </button>
+          </div>
+        </div>
+
+        <!-- Review Text (markdown rendered) -->
+        <div class="review-output" id="review-output" aria-live="polite" aria-label="Review output"></div>
+
+        <!-- Sentiment Analysis -->
+        <div class="sentiment-panel" id="sentiment-panel" hidden aria-label="Sentiment analysis"></div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
