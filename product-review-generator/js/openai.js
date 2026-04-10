@@ -85,7 +85,6 @@ export async function fetchSentiment({ apiKey, model, productName, reviewText })
         required: ['score', 'summary'],
         additionalProperties: false,
       },
-    },
       overall_rating: { type: 'number' },
     },
     required: ['price_value', 'features', 'usability', 'overall_rating'],
