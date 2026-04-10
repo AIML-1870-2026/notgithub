@@ -55,13 +55,15 @@ function _bindApiKey() {
   const eyeOpen    = document.getElementById('eye-open-icon');
   const eyeClosed  = document.getElementById('eye-closed-icon');
 
-  input.addEventListener('input', () => {
+  const syncKey = () => {
     state.apiKey = input.value.trim();
     _validateKey();
     _updateGenerateBtn();
-  });
+  };
 
-  input.addEventListener('blur', _validateKey);
+  input.addEventListener('input',  syncKey);
+  input.addEventListener('change', syncKey);  // catches password-manager autofill
+  input.addEventListener('blur',   syncKey);
 
   visBtn.addEventListener('click', () => {
     const isHidden = input.type === 'password';
@@ -174,7 +176,8 @@ function _bindGenerate() {
 async function _handleGenerate() {
   if (state.generating) return;
 
-  const apiKey      = state.apiKey;
+  // Always read directly from DOM to catch autofill that bypassed the input event
+  const apiKey      = document.getElementById('api-key-input').value.trim();
   const productName = document.getElementById('product-name').value.trim();
   const productDesc = document.getElementById('product-desc').value.trim();
   const category    = document.getElementById('product-category').value.trim();

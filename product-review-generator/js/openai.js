@@ -38,7 +38,7 @@ export async function* streamReview({ apiKey, model, systemPrompt, userPrompt })
       body: JSON.stringify(body),
     });
   } catch {
-    throw new Error('Could not reach OpenAI. Check that your API key is valid and try again.');
+    throw new Error('Request blocked — your API key may be invalid, expired, or have no remaining credits. Double-check it at platform.openai.com and try again.');
   }
 
   if (!res.ok) {
@@ -131,7 +131,7 @@ export async function fetchSentiment({ apiKey, model, productName, reviewText })
       body: JSON.stringify(body),
     });
   } catch {
-    throw new Error('Could not reach OpenAI. Check that your API key is valid and try again.');
+    throw new Error('Request blocked — your API key may be invalid, expired, or have no remaining credits. Double-check it at platform.openai.com and try again.');
   }
 
   if (!res.ok) {
