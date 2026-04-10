@@ -145,6 +145,63 @@
           </div>
         </section>
 
+        <!-- Humor Slider -->
+        <section class="sidebar-section">
+          <div class="param-header">
+            <label class="sidebar-label" for="humor-slider">Humor</label>
+            <span class="param-value" id="humor-label">Neutral</span>
+          </div>
+          <input
+            type="range"
+            id="humor-slider"
+            class="range-slider"
+            min="0" max="100" step="1" value="50"
+            aria-label="Humor: 0 is Serious, 100 is Hilarious"
+          >
+          <div class="slider-labels">
+            <span class="slider-label-text">Serious</span>
+            <span class="slider-label-text">Hilarious</span>
+          </div>
+        </section>
+
+        <!-- Technicality Slider -->
+        <section class="sidebar-section">
+          <div class="param-header">
+            <label class="sidebar-label" for="tech-slider">Technicality</label>
+            <span class="param-value" id="tech-label">General</span>
+          </div>
+          <input
+            type="range"
+            id="tech-slider"
+            class="range-slider"
+            min="0" max="100" step="1" value="50"
+            aria-label="Technicality: 0 is Layman, 100 is Expert"
+          >
+          <div class="slider-labels">
+            <span class="slider-label-text">Layman</span>
+            <span class="slider-label-text">Expert</span>
+          </div>
+        </section>
+
+        <!-- Enthusiasm Slider -->
+        <section class="sidebar-section">
+          <div class="param-header">
+            <label class="sidebar-label" for="hype-slider">Enthusiasm</label>
+            <span class="param-value" id="hype-label">Balanced</span>
+          </div>
+          <input
+            type="range"
+            id="hype-slider"
+            class="range-slider"
+            min="0" max="100" step="1" value="50"
+            aria-label="Enthusiasm: 0 is Stoic, 100 is Hype"
+          >
+          <div class="slider-labels">
+            <span class="slider-label-text">Stoic</span>
+            <span class="slider-label-text">Hype</span>
+          </div>
+        </section>
+
         <div class="sidebar-divider"></div>
 
         <!-- Disclaimer -->
@@ -263,6 +320,9 @@
 
         <!-- Review Text (markdown rendered) -->
         <div class="review-output" id="review-output" aria-live="polite" aria-label="Review output"></div>
+
+        <!-- Overall Star Rating -->
+        <div class="star-rating-panel" id="star-rating-panel" hidden aria-label="Overall star rating"></div>
 
         <!-- Sentiment Analysis -->
         <div class="sentiment-panel" id="sentiment-panel" hidden aria-label="Sentiment analysis"></div>

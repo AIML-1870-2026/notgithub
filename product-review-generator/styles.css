@@ -739,12 +739,100 @@ body {
   line-height: 1.5;
 }
 
+/* ── Star Rating Panel ───────────────────────────────────────── */
+
+.star-rating-panel {
+  margin-top: 16px;
+  animation:  fadeSlideIn 300ms var(--ease) both;
+}
+
+.star-rating-card {
+  background:      var(--surface);
+  border:          1px solid var(--border);
+  border-radius:   var(--r-xl);
+  padding:         28px 24px 22px;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  gap:             10px;
+  transition:      border-color 200ms;
+}
+
+.star-row {
+  display:     flex;
+  gap:         6px;
+  align-items: center;
+}
+
+.star-wrap {
+  position:   relative;
+  display:    inline-flex;
+  width:      40px;
+  height:     40px;
+  opacity:    0;
+  transform:  scale(.6) translateY(6px);
+  transition: opacity 280ms var(--ease), transform 280ms var(--ease);
+}
+
+.star-wrap.star-animate {
+  opacity:   1;
+  transform: scale(1) translateY(0);
+}
+
+.star-svg {
+  position: absolute;
+  inset:    0;
+  width:    100%;
+  height:   100%;
+}
+
+.star-empty  { color: var(--surface-3); }
+.star-filled { color: #FFD60A; }
+
+/* Subtle glow on filled stars */
+.star-filled path {
+  filter: drop-shadow(0 0 4px rgba(255, 214, 10, .45));
+}
+
+.star-numeric {
+  display:     flex;
+  align-items: baseline;
+  gap:         6px;
+  margin-top:  2px;
+}
+
+.star-number {
+  font-size:      36px;
+  font-weight:    700;
+  letter-spacing: -1.5px;
+  color:          var(--text);
+  line-height:    1;
+}
+
+.star-out-of {
+  font-size:  15px;
+  color:      var(--text-3);
+  font-weight: 400;
+}
+
+.star-label {
+  font-size:      11px;
+  font-weight:    600;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color:          var(--text-3);
+}
+
 /* ── Shimmer Loading ─────────────────────────────────────────── */
 
 .loading-card {
   min-height: 120px;
   overflow:   hidden;
   position:   relative;
+}
+
+.star-rating-card.loading-card {
+  min-height: 128px;
 }
 
 .shimmer {

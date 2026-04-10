@@ -86,7 +86,9 @@ export async function fetchSentiment({ apiKey, model, productName, reviewText })
         additionalProperties: false,
       },
     },
-    required: ['price_value', 'features', 'usability'],
+      overall_rating: { type: 'number' },
+    },
+    required: ['price_value', 'features', 'usability', 'overall_rating'],
     additionalProperties: false,
   };
 
@@ -105,7 +107,7 @@ export async function fetchSentiment({ apiKey, model, productName, reviewText })
     messages: [
       {
         role: 'system',
-        content: 'You are a product analyst. Given a product review, return a structured sentiment analysis with scores from 1–10 and brief one-sentence summaries for three aspects: price/value, features, and usability.',
+        content: 'You are a product analyst. Given a product review, return a structured sentiment analysis with scores from 1–10 and brief one-sentence summaries for three aspects: price/value, features, and usability. Also provide an overall_rating from 1.0 to 5.0 in 0.5 increments (e.g. 3.5, 4.0, 4.5) representing the product\'s overall score.',
       },
       {
         role: 'user',

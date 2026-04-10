@@ -17,12 +17,15 @@ const MODEL_FAMILIES = {
 // ── In-Memory State ───────────────────────────────────────────
 
 const state = {
-  apiKey:      '',
-  modelFamily: 'GPT-4o',
-  model:       'gpt-4o',
-  tone:        50,    // 0 = Professional, 100 = Casual
-  length:      50,    // 0 = Concise, 100 = Detailed
-  generating:  false,
+  apiKey:       '',
+  modelFamily:  'GPT-4o',
+  model:        'gpt-4o',
+  tone:         50,    // 0 = Professional, 100 = Casual
+  length:       50,    // 0 = Concise, 100 = Detailed
+  humor:        50,    // 0 = Serious, 100 = Hilarious
+  technicality: 50,    // 0 = Layman, 100 = Expert
+  enthusiasm:   50,    // 0 = Stoic, 100 = Hype
+  generating:   false,
 };
 
 // ── Boot ──────────────────────────────────────────────────────
@@ -115,24 +118,23 @@ function _populateModelDropdown(family) {
 // ── Sliders ───────────────────────────────────────────────────
 
 function _bindSliders() {
-  const toneSlider   = document.getElementById('tone-slider');
-  const lengthSlider = document.getElementById('length-slider');
+  const sliders = [
+    { id: 'tone-slider',   stateKey: 'tone',         labelId: 'tone-label',   labels: ['Professional', 'Balanced',  'Casual']   },
+    { id: 'length-slider', stateKey: 'length',        labelId: 'length-label', labels: ['Concise',      'Moderate',  'Detailed'] },
+    { id: 'humor-slider',  stateKey: 'humor',         labelId: 'humor-label',  labels: ['Serious',      'Neutral',   'Hilarious'] },
+    { id: 'tech-slider',   stateKey: 'technicality',  labelId: 'tech-label',   labels: ['Layman',       'General',   'Expert']   },
+    { id: 'hype-slider',   stateKey: 'enthusiasm',    labelId: 'hype-label',   labels: ['Stoic',        'Balanced',  'Hype']     },
+  ];
 
-  toneSlider.addEventListener('input', () => {
-    state.tone = parseInt(toneSlider.value, 10);
-    _updateSliderLabel('tone-label', state.tone, ['Professional', 'Balanced', 'Casual']);
-    _updateSliderTrack(toneSlider);
-  });
-
-  lengthSlider.addEventListener('input', () => {
-    state.length = parseInt(lengthSlider.value, 10);
-    _updateSliderLabel('length-label', state.length, ['Concise', 'Moderate', 'Detailed']);
-    _updateSliderTrack(lengthSlider);
-  });
-
-  // Init tracks
-  _updateSliderTrack(toneSlider);
-  _updateSliderTrack(lengthSlider);
+  for (const { id, stateKey, labelId, labels } of sliders) {
+    const slider = document.getElementById(id);
+    slider.addEventListener('input', () => {
+      state[stateKey] = parseInt(slider.value, 10);
+      _updateSliderLabel(labelId, state[stateKey], labels);
+      _updateSliderTrack(slider);
+    });
+    _updateSliderTrack(slider);
+  }
 }
 
 function _updateSliderLabel(id, value, labels) {
@@ -189,6 +191,7 @@ async function _handleGenerate() {
   const { systemPrompt, userPrompt } = _buildPrompts({
     productName, productDesc, category, features,
     tone: state.tone, length: state.length,
+    humor: state.humor, technicality: state.technicality, enthusiasm: state.enthusiasm,
   });
 
   let fullReview = '';
@@ -225,16 +228,35 @@ async function _handleGenerate() {
 
 // ── Prompt Builder ────────────────────────────────────────────
 
-function _buildPrompts({ productName, productDesc, category, features, tone, length }) {
-  const toneDesc   = tone <= 25  ? 'formal and professional'
-                   : tone <= 75  ? 'balanced and informative'
-                   :               'conversational and casual';
+function _buildPrompts({ productName, productDesc, category, features, tone, length, humor, technicality, enthusiasm }) {
+  const toneDesc = tone <= 25  ? 'formal and professional'
+                 : tone <= 75  ? 'balanced and informative'
+                 :               'conversational and casual';
 
   const lengthDesc = length <= 25 ? 'concise (150–250 words)'
                    : length <= 75  ? 'moderate (300–450 words)'
                    :                 'detailed and thorough (500–700 words)';
 
-  const systemPrompt = `You are an expert product reviewer with years of experience writing clear, balanced, and helpful reviews. Write reviews in a ${toneDesc} tone. Target length: ${lengthDesc}. Always structure your review with these markdown sections: ## Overview, ## Pros, ## Cons, ## Verdict. Use bullet points for pros and cons. Be honest, specific, and useful to potential buyers.`;
+  const humorDesc = humor <= 25  ? 'Keep the tone completely serious — no humor or jokes whatsoever.'
+                  : humor <= 75  ? 'Occasionally use light wit or a clever turn of phrase, but stay mostly informative.'
+                  :               'Be funny and entertaining throughout — use puns, jokes, and witty observations. Make the reader laugh while still being informative.';
+
+  const techDesc = technicality <= 25  ? 'Use simple, everyday language a non-technical consumer would understand. Avoid all jargon.'
+                 : technicality <= 75  ? 'Use moderate technical depth appropriate for a general audience.'
+                 :                       'Write at an expert level with precise technical specifications, industry terminology, and deep analysis of engineering choices.';
+
+  const hypeDesc = enthusiasm <= 25  ? 'Be measured and stoic — state facts plainly, avoid exclamation points and superlatives.'
+                 : enthusiasm <= 75  ? 'Be positive but grounded — show genuine enthusiasm where warranted.'
+                 :                     'Be extremely enthusiastic and energetic! Use exclamation points freely! Gush about the good parts! Make the reader feel the excitement!';
+
+  const systemPrompt = [
+    `You are an expert product reviewer. Always structure your review with these markdown sections: ## Overview, ## Pros, ## Cons, ## Verdict. Use bullet points for pros and cons.`,
+    `Tone: ${toneDesc}`,
+    `Length: ${lengthDesc}`,
+    `Humor: ${humorDesc}`,
+    `Technical depth: ${techDesc}`,
+    `Enthusiasm: ${hypeDesc}`,
+  ].join('\n');
 
   const parts = [
     `Write a product review for: **${productName}**`,
@@ -271,6 +293,7 @@ function _clearOutput() {
   document.getElementById('review-output').innerHTML = '<div class="output-placeholder">Generating your review…</div>';
   document.getElementById('copy-btn').hidden = true;
   document.getElementById('regenerate-btn').hidden = true;
+  document.getElementById('star-rating-panel').hidden = true;
   _hideSentiment();
 }
 
@@ -280,6 +303,12 @@ function _showReviewError(msg) {
 }
 
 function _showSentimentLoading() {
+  // Star rating loading state
+  const starPanel = document.getElementById('star-rating-panel');
+  starPanel.hidden = false;
+  starPanel.innerHTML = `<div class="star-rating-card loading-card"><div class="shimmer"></div></div>`;
+
+  // Sentiment cards loading state
   const panel = document.getElementById('sentiment-panel');
   panel.hidden = false;
   panel.innerHTML = `
@@ -292,7 +321,33 @@ function _showSentimentLoading() {
 }
 
 function _renderSentiment(data) {
-  const panel = document.getElementById('sentiment-panel');
+  // ── Star Rating ──────────────────────────────────────────────
+  const rawRating = data.overall_rating ?? 0;
+  const rating    = Math.min(5, Math.max(0, Math.round(rawRating * 2) / 2)); // clamp, snap to 0.5
+
+  const starPanel = document.getElementById('star-rating-panel');
+  starPanel.innerHTML = `
+    <div class="star-rating-card">
+      <div class="star-row" aria-label="${rating} out of 5 stars">
+        ${_buildStarSvgs(rating)}
+      </div>
+      <div class="star-numeric">
+        <span class="star-number">${rating.toFixed(1)}</span>
+        <span class="star-out-of">out of 5</span>
+      </div>
+      <p class="star-label">Overall Rating</p>
+    </div>`;
+
+  // Animate stars in after a brief paint delay
+  requestAnimationFrame(() => {
+    starPanel.querySelectorAll('.star-wrap').forEach((star, i) => {
+      star.style.animationDelay = `${i * 80}ms`;
+      star.classList.add('star-animate');
+    });
+  });
+
+  // ── Sentiment Cards ──────────────────────────────────────────
+  const panel   = document.getElementById('sentiment-panel');
   const aspects = [
     { key: 'price_value', label: 'Price / Value', icon: '💰' },
     { key: 'features',    label: 'Features',      icon: '⚙️' },
@@ -323,13 +378,41 @@ function _renderSentiment(data) {
     <h3 class="sentiment-title">Sentiment Analysis</h3>
     <div class="sentiment-cards">${cardsHtml}</div>`;
 
-  // Show copy + regenerate after everything is done
+  // Show copy + regenerate
   document.getElementById('copy-btn').hidden = false;
   document.getElementById('regenerate-btn').hidden = false;
 }
 
+/**
+ * Build 5 SVG star elements supporting half-star fills.
+ * Each star uses two layers: an empty base + a filled layer clipped by fill %.
+ */
+function _buildStarSvgs(rating) {
+  const starPath = 'M12 2L14.5 9.5H22L16 14L18.5 21.5L12 17L5.5 21.5L8 14L2 9.5H9.5L12 2Z';
+  let html = '';
+
+  for (let i = 1; i <= 5; i++) {
+    const fill    = Math.min(1, Math.max(0, rating - (i - 1))); // 0, 0.5, or 1
+    const clipPct = Math.round(fill * 100);                      // right-clip: 100-clipPct %
+
+    html += `
+      <span class="star-wrap" aria-hidden="true">
+        <svg class="star-svg star-empty" viewBox="0 0 24 24" fill="none">
+          <path d="${starPath}" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+        </svg>
+        <svg class="star-svg star-filled" viewBox="0 0 24 24"
+             style="clip-path:inset(0 ${100 - clipPct}% 0 0)">
+          <path d="${starPath}" fill="currentColor"/>
+        </svg>
+      </span>`;
+  }
+
+  return html;
+}
+
 function _hideSentiment() {
   document.getElementById('sentiment-panel').hidden = true;
+  document.getElementById('star-rating-panel').hidden = true;
 }
 
 async function _copyReview() {
