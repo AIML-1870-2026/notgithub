@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Science Experiment Generator</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+  <!-- ── Header ──────────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-brand">
+      <!-- Flask icon -->
+      <svg class="brand-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M9 3h6M9 3v8L5.5 17A2 2 0 0 0 7.28 20h9.44a2 2 0 0 0 1.78-2.91L15 11V3"
+              stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8.5 17h7" stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round"/>
+        <circle cx="10" cy="15" r="1" fill="currentColor"/>
+        <circle cx="13" cy="18" r=".8" fill="currentColor"/>
+      </svg>
+      <span class="brand-name">Experiment Generator</span>
+    </div>
+
+    <button class="theme-toggle" id="theme-toggle" aria-label="Switch to light mode">
+      <!-- Sun (dark mode) -->
+      <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <!-- Moon (light mode) -->
+      <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+              stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- ── App Layout ───────────────────────────────────────────── -->
+  <div class="app-layout">
+
+    <!-- ── Sidebar ──────────────────────────────────────────────── -->
+    <aside class="sidebar" aria-label="Settings">
+      <div class="sidebar-scroll">
+
+        <!-- Provider Tabs -->
+        <section class="sidebar-section">
+          <label class="sidebar-label">AI Provider</label>
+          <div class="provider-tabs" role="tablist" aria-label="AI Provider">
+            <button class="provider-tab active" role="tab"
+                    data-provider="openai" aria-selected="true">OpenAI</button>
+            <button class="provider-tab" role="tab"
+                    data-provider="anthropic" aria-selected="false">Anthropic</button>
+            <button class="provider-tab" role="tab"
+                    data-provider="gemini" aria-selected="false">Gemini</button>
+          </div>
+        </section>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- API Key -->
+        <section class="sidebar-section">
+          <label class="sidebar-label" for="api-key-input">API Key</label>
+          <div class="input-group">
+            <input
+              type="password"
+              id="api-key-input"
+              class="input"
+              placeholder="sk-…"
+              autocomplete="off"
+              spellcheck="false"
+              aria-describedby="key-status"
+            >
+            <button class="input-addon" id="key-visibility-btn" aria-label="Show key">
+              <!-- Eye open -->
+              <svg class="icon" id="eye-open-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                      stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+              <!-- Eye closed -->
+              <svg class="icon hidden" id="eye-closed-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22"
+                      stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <div class="key-status" id="key-status" aria-live="polite"></div>
+          <div class="proxy-notice" id="proxy-notice" hidden>
+            Anthropic requires a local proxy. Run
+            <code>node server.js</code> first.
+          </div>
+        </section>
+
+        <!-- Model -->
+        <section class="sidebar-section">
+          <label class="sidebar-label" for="model-select">Model</label>
+          <div class="select-wrapper">
+            <select id="model-select" class="select" aria-label="Select model"></select>
+            <svg class="select-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </section>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Subject Area -->
+        <section class="sidebar-section">
+          <label class="sidebar-label" for="subject-select">Subject Area</label>
+          <div class="select-wrapper">
+            <select id="subject-select" class="select">
+              <option value="General Science">General Science</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Biology">Biology</option>
+              <option value="Physics">Physics</option>
+              <option value="Earth Science">Earth Science</option>
+              <option value="Computer Science">Computer Science</option>
+            </select>
+            <svg class="select-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </section>
+
+        <!-- Grade Level -->
+        <section class="sidebar-section">
+          <label class="sidebar-label" for="grade-select">Grade Level</label>
+          <div class="select-wrapper">
+            <select id="grade-select" class="select">
+              <option value="K–2 (Ages 5–8)">K–2 (Ages 5–8)</option>
+              <option value="3–5 (Ages 8–11)">3–5 (Ages 8–11)</option>
+              <option value="6–8 (Ages 11–14)" selected>6–8 (Ages 11–14)</option>
+              <option value="9–12 (Ages 14–18)">9–12 (Ages 14–18)</option>
+              <option value="College / University">College / University</option>
+            </select>
+            <svg class="select-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </section>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Difficulty -->
+        <section class="sidebar-section">
+          <div class="param-header">
+            <label class="sidebar-label" for="difficulty-slider">Difficulty</label>
+            <span class="param-value" id="difficulty-label">Intermediate</span>
+          </div>
+          <input type="range" id="difficulty-slider" class="range-slider"
+                 min="0" max="100" step="1" value="50"
+                 aria-label="Difficulty: 0 is Beginner, 100 is Advanced">
+          <div class="slider-labels">
+            <span class="slider-label-text">Beginner</span>
+            <span class="slider-label-text">Advanced</span>
+          </div>
+        </section>
+
+        <!-- Duration -->
+        <section class="sidebar-section">
+          <div class="param-header">
+            <label class="sidebar-label" for="duration-slider">Duration</label>
+            <span class="param-value" id="duration-label">Standard</span>
+          </div>
+          <input type="range" id="duration-slider" class="range-slider"
+                 min="0" max="100" step="1" value="50"
+                 aria-label="Duration: 0 is Quick, 100 is Extended">
+          <div class="slider-labels">
+            <span class="slider-label-text">Quick</span>
+            <span class="slider-label-text">Extended</span>
+          </div>
+        </section>
+
+        <!-- Detail Level -->
+        <section class="sidebar-section">
+          <div class="param-header">
+            <label class="sidebar-label" for="detail-slider">Detail Level</label>
+            <span class="param-value" id="detail-label">Standard</span>
+          </div>
+          <input type="range" id="detail-slider" class="range-slider"
+                 min="0" max="100" step="1" value="50"
+                 aria-label="Detail: 0 is Overview, 100 is Comprehensive">
+          <div class="slider-labels">
+            <span class="slider-label-text">Overview</span>
+            <span class="slider-label-text">Comprehensive</span>
+          </div>
+        </section>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="sidebar-info">
+          <strong>Educational use only.</strong> Always supervise experiments
+          appropriately for the age group. API keys are kept in memory only
+          and never stored or transmitted beyond the AI provider.
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- ── Main Content ─────────────────────────────────────────── -->
+    <main class="main-content">
+
+      <!-- Input Card -->
+      <div class="card">
+        <h1 class="card-title">Science Experiment Generator</h1>
+        <p class="card-subtitle">
+          Enter your available supplies and get a custom, grade-appropriate
+          science experiment — complete with objectives, procedure, and analysis.
+        </p>
+
+        <div class="form-grid">
+
+          <!-- Supplies -->
+          <div class="form-field">
+            <label class="form-label" for="supplies-input">
+              Available Supplies
+              <span class="required" aria-hidden="true">*</span>
+            </label>
+            <textarea
+              id="supplies-input"
+              class="form-textarea"
+              rows="4"
+              placeholder="e.g. baking soda, vinegar, food coloring, balloons, plastic cups, measuring spoons, salt, sugar, paper towels…"
+              aria-required="true"
+            ></textarea>
+          </div>
+
+          <!-- Context -->
+          <div class="form-field">
+            <label class="form-label" for="context-input">
+              Additional Context
+              <span style="font-weight:400;color:var(--text-3)">(optional)</span>
+            </label>
+            <textarea
+              id="context-input"
+              class="form-textarea"
+              rows="2"
+              placeholder="e.g. Focus on chemical reactions, outdoor setting, we have access to a sink…"
+            ></textarea>
+          </div>
+
+        </div>
+
+        <!-- Generate CTA -->
+        <div class="generate-wrap">
+          <button class="btn-primary" id="generate-btn" disabled aria-label="Generate experiment">
+            <span id="generate-spinner" class="spinner" hidden aria-hidden="true"></span>
+            <svg class="btn-icon" id="generate-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M9 3h6M9 3v8L5.5 17A2 2 0 0 0 7.28 20h9.44a2 2 0 0 0 1.78-2.91L15 11V3"
+                    stroke="currentColor" stroke-width="1.75"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span id="generate-text">Generate Experiment</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Output Section (hidden until first generation) -->
+      <section class="output-section" id="output-section" hidden>
+
+        <div class="output-header">
+          <h2 class="output-title">Generated Experiment</h2>
+          <div class="output-actions">
+            <button class="btn-ghost" id="regenerate-btn" hidden aria-label="Regenerate">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <polyline points="23 4 23 10 17 10"
+                          stroke="currentColor" stroke-width="1.5"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"
+                      stroke="currentColor" stroke-width="1.5"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Regenerate
+            </button>
+            <button class="btn-ghost" id="download-btn" hidden aria-label="Download as text">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                      stroke="currentColor" stroke-width="1.5"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="7 10 12 15 17 10"
+                          stroke="currentColor" stroke-width="1.5"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="12" y1="15" x2="12" y2="3"
+                      stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              Download
+            </button>
+            <button class="btn-ghost" id="copy-btn" hidden aria-label="Copy to clipboard">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2"
+                      stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                      stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+              Copy
+            </button>
+          </div>
+        </div>
+
+        <!-- Streamed Experiment Text -->
+        <div class="experiment-output" id="experiment-output"
+             aria-live="polite" aria-label="Generated experiment"></div>
+
+        <!-- Structured Analysis (rendered after streaming) -->
+        <div class="analysis-panel" id="analysis-panel" hidden
+             aria-label="Experiment analysis"></div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
