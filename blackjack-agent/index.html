@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blackjack AI Agent</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ── Header ────────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="header-left">
+      <h1 class="app-title">
+        <span class="title-icon">♠</span>
+        Blackjack <span class="title-accent">AI Agent</span>
+      </h1>
+    </div>
+
+    <div class="header-center">
+      <div class="key-zone" id="key-zone">
+        <input type="file" id="env-file-input" accept=".env,text/plain" hidden>
+
+        <!-- Paste input -->
+        <div class="key-paste-row">
+          <span class="key-icon">🔑</span>
+          <input
+            type="password"
+            id="api-key-input"
+            class="key-input"
+            placeholder="Paste API key (sk-ant-… or sk-…)"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button class="btn-key-load" id="btn-key-load">Load</button>
+          <button class="btn-key-clear hidden" id="btn-key-clear" title="Remove key">✕</button>
+        </div>
+
+        <!-- Drop zone -->
+        <div class="env-drop" id="env-drop-target">
+          <span class="env-label" id="env-label">or drop .env file</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="provider-badge hidden" id="provider-badge"></div>
+      <button class="mode-toggle" id="mode-toggle" title="Toggle play mode">
+        <span class="mode-icon" id="mode-icon">▶▶</span>
+        <span class="mode-label" id="mode-label">Auto</span>
+      </button>
+      <button class="icon-btn" id="btn-analytics" title="Analytics">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="btn-settings" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Main content ──────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- Left panel: Strategy Matrix -->
+    <aside class="panel panel-left" id="panel-left">
+      <div class="panel-header">
+        <span class="panel-title">Strategy Matrix</span>
+        <span class="panel-subtitle">Optimal basic strategy</span>
+      </div>
+      <div class="matrix-container" id="strategy-matrix"></div>
+    </aside>
+
+    <!-- Center: Game table -->
+    <section class="game-table" id="game-table">
+
+      <!-- Shoe info -->
+      <div class="table-info-row">
+        <span class="info-chip" id="shoe-display">Shoe: —</span>
+        <span class="info-chip" id="count-display" hidden>Count: —</span>
+      </div>
+
+      <!-- Dealer area -->
+      <div class="play-area dealer-area">
+        <div class="area-label">
+          Dealer
+          <span class="score-badge" id="dealer-score">—</span>
+        </div>
+        <div class="card-row" id="dealer-cards"></div>
+      </div>
+
+      <!-- Message strip -->
+      <div class="message-strip" id="message-strip">
+        <span id="game-message">Load an API key to begin</span>
+      </div>
+
+      <!-- Player area -->
+      <div class="play-area player-area">
+        <div class="hand-tabs" id="hand-tabs"></div>
+        <div class="card-row" id="player-cards"></div>
+        <div class="area-label">
+          You
+          <span class="score-badge" id="player-score">—</span>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="action-row" id="action-row">
+        <button class="btn btn-action" id="btn-hit" disabled>Hit</button>
+        <button class="btn btn-action" id="btn-stand" disabled>Stand</button>
+        <button class="btn btn-action" id="btn-double" disabled>Double</button>
+        <button class="btn btn-action" id="btn-split" disabled>Split</button>
+      </div>
+
+      <!-- Insurance prompt -->
+      <div class="insurance-row hidden" id="insurance-row">
+        <span class="insurance-label">Insurance?</span>
+        <button class="btn btn-sm btn-yes" id="btn-insurance-yes">Yes (½ bet)</button>
+        <button class="btn btn-sm btn-no" id="btn-insurance-no">No</button>
+      </div>
+
+      <!-- Betting controls -->
+      <div class="bet-row" id="bet-row">
+        <div class="chip-rack" id="chip-rack">
+          <button class="chip chip-5"   data-value="5"  >$5</button>
+          <button class="chip chip-25"  data-value="25" >$25</button>
+          <button class="chip chip-100" data-value="100">$100</button>
+          <button class="chip chip-500" data-value="500">$500</button>
+        </div>
+        <div class="bet-summary">
+          <div class="bet-line">Bet <span class="bet-value" id="bet-amount">$0</span></div>
+          <div class="bankroll-line">Bank <span class="bankroll-value" id="bankroll-amount">$1,000</span></div>
+        </div>
+        <div class="bet-actions">
+          <button class="btn btn-sm" id="btn-clear-bet">Clear</button>
+          <button class="btn btn-deal" id="btn-deal" disabled>Deal</button>
+          <button class="btn btn-deal hidden" id="btn-new-round">New Hand</button>
+        </div>
+      </div>
+
+      <!-- Step-mode execute button -->
+      <div class="execute-row hidden" id="execute-row">
+        <button class="btn btn-execute" id="btn-execute">
+          Execute Recommendation
+          <span class="execute-action" id="execute-action-label"></span>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- Right panel: Agent Analysis + Controls -->
+    <aside class="panel panel-right" id="panel-right">
+
+      <!-- Agent decision card -->
+      <div class="agent-card" id="agent-card">
+        <div class="agent-card-header">
+          <span class="agent-icon">🤖</span>
+          <span class="agent-title">AI Agent</span>
+          <span class="agent-thinking-dots hidden" id="thinking-dots">
+            <span></span><span></span><span></span>
+          </span>
+        </div>
+
+        <div class="agent-idle" id="agent-idle">
+          <p>Waiting for a hand to analyze…</p>
+        </div>
+
+        <div class="agent-decision hidden" id="agent-decision">
+          <div class="decision-action" id="decision-action">—</div>
+          <div class="decision-confidence">
+            Confidence
+            <div class="confidence-bar-track">
+              <div class="confidence-bar-fill" id="confidence-bar"></div>
+            </div>
+            <span id="confidence-pct">—</span>
+          </div>
+          <div class="decision-reasoning" id="decision-reasoning"></div>
+          <div class="decision-stats hidden" id="decision-stats"></div>
+          <div class="decision-deep hidden" id="decision-deep"></div>
+          <div class="strategy-match" id="strategy-match"></div>
+        </div>
+      </div>
+
+      <!-- Explainability controls (Stretch #3) -->
+      <div class="control-section">
+        <div class="control-label">Explanation depth</div>
+        <div class="segmented" id="explain-control">
+          <button class="seg-btn" data-value="basic">Basic</button>
+          <button class="seg-btn active" data-value="statistical">Statistical</button>
+          <button class="seg-btn" data-value="indepth">In-depth</button>
+        </div>
+      </div>
+
+      <!-- Risk profile (Stretch #4) -->
+      <div class="control-section">
+        <div class="control-label">Risk profile</div>
+        <div class="risk-profile-selector" id="risk-control">
+          <button class="risk-btn" data-value="conservative">
+            <span class="risk-icon">🛡</span>
+            <span class="risk-name">Conservative</span>
+          </button>
+          <button class="risk-btn active" data-value="balanced">
+            <span class="risk-icon">⚖️</span>
+            <span class="risk-name">Balanced</span>
+          </button>
+          <button class="risk-btn" data-value="aggressive">
+            <span class="risk-icon">⚡</span>
+            <span class="risk-name">Aggressive</span>
+          </button>
+        </div>
+        <div class="risk-desc" id="risk-desc">
+          Standard basic strategy for optimal expected value.
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- ── Analytics bar (Stretch #2) ───────────────────────── -->
+  <footer class="analytics-bar" id="analytics-bar">
+    <div class="stat-pill">
+      Win rate <strong id="stat-winrate">—</strong>
+    </div>
+    <div class="stat-pill">
+      Net P/L <strong id="stat-pnl" class="pnl-neutral">$0</strong>
+    </div>
+    <div class="stat-pill">
+      Hands <strong id="stat-hands">0</strong>
+    </div>
+    <div class="stat-pill">
+      Decision quality <strong id="stat-quality">—</strong>
+    </div>
+    <div class="sparkline-container">
+      <svg class="sparkline" id="sparkline" viewBox="0 0 120 28" preserveAspectRatio="none">
+        <polyline id="sparkline-line" points="" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <button class="analytics-expand" id="btn-analytics-expand" title="View full analytics">↗</button>
+  </footer>
+
+</div><!-- /app-shell -->
+
+<!-- ── Analytics Modal ──────────────────────────────────── -->
+<div class="modal-overlay hidden" id="analytics-modal">
+  <div class="modal-panel">
+    <div class="modal-header">
+      <h2>Performance Analytics</h2>
+      <button class="modal-close" id="analytics-modal-close">✕</button>
+    </div>
+    <div class="modal-body" id="analytics-modal-body">
+      <div class="analytics-grid">
+        <div class="analytics-stat-card">
+          <div class="stat-card-value" id="modal-winrate">—</div>
+          <div class="stat-card-label">Win Rate</div>
+        </div>
+        <div class="analytics-stat-card">
+          <div class="stat-card-value" id="modal-hands">0</div>
+          <div class="stat-card-label">Hands Played</div>
+        </div>
+        <div class="analytics-stat-card">
+          <div class="stat-card-value" id="modal-quality">—</div>
+          <div class="stat-card-label">AI vs Basic Strategy</div>
+        </div>
+        <div class="analytics-stat-card">
+          <div class="stat-card-value" id="modal-blackjacks">0</div>
+          <div class="stat-card-label">Blackjacks</div>
+        </div>
+        <div class="analytics-stat-card">
+          <div class="stat-card-value" id="modal-pnl">$0</div>
+          <div class="stat-card-label">Net P/L</div>
+        </div>
+        <div class="analytics-stat-card">
+          <div class="stat-card-value" id="modal-wagered">$0</div>
+          <div class="stat-card-label">Total Wagered</div>
+        </div>
+      </div>
+      <div class="bankroll-chart-section">
+        <h3>Bankroll History</h3>
+        <svg class="bankroll-chart" id="bankroll-chart" viewBox="0 0 400 100" preserveAspectRatio="none">
+          <polyline id="bankroll-line" points="" fill="none" stroke="var(--accent)" stroke-width="2"/>
+        </svg>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm btn-danger" id="btn-reset-analytics">Reset Stats</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Settings Modal ───────────────────────────────────── -->
+<div class="modal-overlay hidden" id="settings-modal">
+  <div class="modal-panel modal-panel-sm">
+    <div class="modal-header">
+      <h2>Settings</h2>
+      <button class="modal-close" id="settings-modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <label class="setting-row">
+        <span>Sound effects</span>
+        <div class="toggle-switch" id="toggle-sound">
+          <input type="checkbox" id="setting-sound" checked>
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        </div>
+      </label>
+      <label class="setting-row">
+        <span>Show card count (Hi-Lo)</span>
+        <div class="toggle-switch" id="toggle-count">
+          <input type="checkbox" id="setting-count" checked>
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        </div>
+      </label>
+      <label class="setting-row">
+        <span>Auto-deal new hands</span>
+        <div class="toggle-switch" id="toggle-autodeal">
+          <input type="checkbox" id="setting-autodeal" checked>
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        </div>
+      </label>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
